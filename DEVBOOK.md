@@ -1,6 +1,6 @@
 # DEVBOOK – DIP'Easy (TDD)
 
-Ce DEVBOOK liste toutes les User Stories, Critères d'acceptation et Tests à écrire pour la méthodologie TDD.  
+Ce DEVBOOK liste toutes les User Stories, Critères d'acceptance et Tests à écrire pour la méthodologie TDD.  
 Cochez les items au fur et à mesure de leur implémentation :
 
 > **Légende**
@@ -16,7 +16,7 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > En tant qu'utilisateur, je veux pouvoir me connecter avec login/mot de passe et, si activé, un code 2FA, pour accéder à l'application.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
 - [x] Page de connexion créée avec Chakra UI
 - [x] Structure de routage mise en place
@@ -56,8 +56,11 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > En tant que Responsable Qualité, je veux voir mes KPI et la liste des derniers produits pour piloter mon activité.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
+- [x] Interface visuelle du Dashboard créée avec Chakra UI
+- [x] Cartes de statistiques avec design moderne et effets de survol
+- [x] Tableau des derniers produits avec style épuré
 - [ ] GET /dashboard/kpis renvoie `{dips_generated: int, errors: int, avg_time: float}`
 - [ ] GET /dashboard/recent-products renvoie un tableau des 5 derniers produits
 
@@ -65,6 +68,17 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 - [ ] test_get_kpis_structure_and_types
 - [ ] test_get_recent_products_length_and_fields
+
+**Prochaines étapes**
+
+1. [x] Créer la structure visuelle du Dashboard
+2. [x] Implémenter les cartes de statistiques
+3. [x] Créer le tableau des derniers produits
+4. [ ] Connecter le frontend à l'API pour les données réelles
+5. [ ] Ajouter des filtres et options de tri au tableau
+6. [ ] Implémenter la pagination des données
+7. [ ] Ajouter des graphiques pour visualiser les tendances
+8. [ ] Implémenter l'export des données
 
 ---
 
@@ -74,7 +88,7 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > Je veux lister, filtrer, créer et éditer des produits pour alimenter mes DIP.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
 - [ ] GET /products supporte filtres `?q=&status=&date=&tag=`
 - [ ] POST /products crée un produit (201 + payload)
@@ -96,7 +110,7 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > Je dois renseigner toutes les données réglementaires et importer mes pièces jointes en cinq étapes.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
 - [ ] GET /products/:id/collection renvoie l'état de complétude par étape
 - [ ] PUT /products/:id/collection/step met à jour les données d'une étape et renvoie nouvelle complétude
@@ -116,7 +130,7 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > Je veux importer un template Word et configurer la table des matières et le style pour mes futurs DIP.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
 - [ ] POST /templates avec fichier .dotx renvoie 201 + template ID
 - [ ] GET /templates/:id renvoie métadonnées + JSON TOC + style guide
@@ -136,7 +150,7 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > Je sélectionne un produit, un template et un format (Word/PDF), je génère mon DIP.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
 - [ ] POST /generation avec `{productId, templateId, format}` renvoie 202 + job ID
 - [ ] GET /generation/:jobId renvoie `status` et `download_url` quand `done`
@@ -155,7 +169,7 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > Je veux définir et piloter des tâches récurrentes pour générer, collecter et archiver mes DIP.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
 - [ ] GET /tasks liste toutes les tâches planifiées
 - [ ] POST /tasks crée une tâche avec RRULE valide
@@ -174,7 +188,7 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > Je veux consulter et exporter l'historique des actions et erreurs pour audit.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
 - [ ] GET /logs supporte filtres `?from=&to=&type=`
 - [ ] GET /logs/export renvoie un CSV téléchargeable
@@ -192,7 +206,7 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > Je gère les utilisateurs, la 2FA, les backups et le mode maintenance depuis une console admin.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
 - [ ] CRUD /admin/users (POST, GET, PUT, DELETE)
 - [ ] CRUD /admin/settings
@@ -211,7 +225,7 @@ Cochez les items au fur et à mesure de leur implémentation :
 
 > J'accède à la FAQ, aux tutoriels et à un chatbot pour m'assister.
 
-**Critères d'acceptation**
+**Critères d'acceptance**
 
 - [ ] GET /help/faq renvoie la liste des questions/réponses
 - [ ] GET /help/tutorials renvoie des liens vers les tutoriels
