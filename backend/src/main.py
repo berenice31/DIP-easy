@@ -10,7 +10,11 @@ app = FastAPI(
 # Configuration CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Frontend URL
+    allow_origins=[
+        "http://localhost:5173",  # Frontend URL en développement
+        "https://dipeasy.com",    # URL de production
+        "https://www.dipeasy.com" # URL de production avec www
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
