@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardBody,
   Stat,
-  StatLabel,
   StatNumber,
   StatHelpText,
   StatArrow,
@@ -36,7 +35,6 @@ import {
 const Dashboard = () => {
   const { isAuthenticated } = useAuth();
   const primaryColor = "blue.600";
-  const secondaryColor = "blue.400";
 
   // Données en dur pour le tableau des derniers produits
   const derniersProduits = [

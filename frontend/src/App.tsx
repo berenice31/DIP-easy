@@ -6,7 +6,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Register from "./pages/Register";
-import Layout from "./components/Layout";
 
 function App() {
   return (
