@@ -1,102 +1,96 @@
 import {
   Box,
+  Flex,
+  Text,
   VStack,
   Icon,
-  Text,
-  HStack,
-  Image,
-  useTheme,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import {
   FiHome,
+  FiPackage,
+  FiClipboard,
   FiFileText,
+  FiZap,
   FiSettings,
+  FiActivity,
   FiUsers,
-  FiClock,
-  FiLogOut,
+  FiHelpCircle,
 } from "react-icons/fi";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
 
-const Sidebar = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { logout } = useAuth();
-  const theme = useTheme();
+interface MenuItem {
+  label: string;
+  icon: any;
+  path: string;
+}
 
-  const menuItems = [
-    { icon: FiHome, label: "Dashboard", path: "/dashboard" },
-    { icon: FiFileText, label: "Produits", path: "/products" },
-    { icon: FiClock, label: "Tâches", path: "/tasks" },
-    { icon: FiUsers, label: "Utilisateurs", path: "/users" },
-    { icon: FiSettings, label: "Paramètres", path: "/settings" },
-  ];
+const menuItems: MenuItem[] = [
+  { label: "Tableau de bord", icon: FiHome, path: "/dashboard" },
+  { label: "Produits", icon: FiPackage, path: "/products" },
+  { label: "Collecte", icon: FiClipboard, path: "/collection" },
+  { label: "Templates", icon: FiFileText, path: "/templates" },
+  { label: "Génération", icon: FiZap, path: "/generation" },
+  { label: "Automatisation", icon: FiSettings, path: "/automation" },
+  { label: "Logs", icon: FiActivity, path: "/logs" },
+  { label: "Administration", icon: FiUsers, path: "/admin" },
+  { label: "Aide", icon: FiHelpCircle, path: "/help" },
+];
+
+interface SidebarProps {
+  activePath: string;
+  onNavigate: (path: string) => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ activePath, onNavigate }) => {
+  const activeBg = "#4490E2";
+  const activeColor = "#FFFFFF";
+  const inactiveColor = "#F5F7FA";
 
   return (
     <Box
       w="250px"
       h="100vh"
-      bg={theme.colors.custom.sidebar}
+      bg="#2A3E50"
       position="fixed"
       left={0}
       top={0}
-      p={4}
+      overflowY="auto"
     >
-      <VStack spacing={4} align="stretch">
-        <Box mb={8} display="flex" flexDirection="column" alignItems="center">
-          <Image
-            src="/logo-drop.svg"
-            alt="Logo DIP'Easy"
-            w="60px"
-            h="60px"
-            mb={2}
-          />
-          <Text
-            fontSize="2xl"
-            fontWeight="bold"
-            color="white"
-            textAlign="center"
-          >
-            DIP'Easy
-          </Text>
-        </Box>
+      <Flex
+        h="56px"
+        align="center"
+        justify="center"
+        borderBottom="1px solid"
+        borderColor="whiteAlpha.200"
+      >
+        <Text color="white" fontSize="xl" fontWeight="bold">
+          DIP-easy
+        </Text>
+      </Flex>
 
-        {menuItems.map((item) => (
-          <HStack
-            key={item.path}
-            p={3}
-            borderRadius="md"
-            cursor="pointer"
-            bg={
-              location.pathname === item.path
-                ? theme.colors.custom.active
-                : "transparent"
-            }
-            color="white"
-            _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
-            onClick={() => navigate(item.path)}
-          >
-            <Icon as={item.icon} boxSize={5} />
-            <Text>{item.label}</Text>
-          </HStack>
-        ))}
-
-        <Box mt="auto">
-          <HStack
-            p={3}
-            borderRadius="md"
-            cursor="pointer"
-            color="white"
-            _hover={{ bg: "rgba(255, 255, 255, 0.1)" }}
-            onClick={logout}
-          >
-            <Icon as={FiLogOut} boxSize={5} />
-            <Text>Déconnexion</Text>
-          </HStack>
-        </Box>
+      <VStack spacing={1} align="stretch" p={4}>
+        {menuItems.map((item) => {
+          const isActive = activePath === item.path;
+          return (
+            <Flex
+              key={item.path}
+              align="center"
+              p={3}
+              borderRadius="md"
+              cursor="pointer"
+              bg={isActive ? activeBg : "transparent"}
+              color={isActive ? activeColor : inactiveColor}
+              _hover={{
+                bg: isActive ? activeBg : "whiteAlpha.100",
+              }}
+              onClick={() => onNavigate(item.path)}
+            >
+              <Icon as={item.icon} mr={3} fontSize="16px" />
+              <Text fontSize="16px">{item.label}</Text>
+            </Flex>
+          );
+        })}
       </VStack>
     </Box>
   );
 };
-
-export default Sidebar;
