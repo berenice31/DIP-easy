@@ -29,17 +29,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      if (response.data.token) {
+      if (response.data.access_token) {
         console.log("Token reçu, connexion réussie");
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("token", response.data.access_token);
         setIsAuthenticated(true);
         navigate("/dashboard");
       } else {
         console.error("Pas de token dans la réponse");
         throw new Error("Pas de token dans la réponse");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur de connexion:", error);
+      if (error.response?.status === 401) {
+        throw new Error("Identifiants incorrects");
+      }
       throw error;
     }
   };

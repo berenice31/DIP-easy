@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://api.dipeasy.com",
-  withCredentials: true,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+  withCredentials: false,
   headers: {
     "Content-Type": "application/json",
   },
