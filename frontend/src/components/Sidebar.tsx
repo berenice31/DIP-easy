@@ -16,7 +16,9 @@ import {
   FiActivity,
   FiUsers,
   FiHelpCircle,
+  FiLogOut,
 } from "react-icons/fi";
+import { useAuth } from "../contexts/AuthContext";
 
 interface MenuItem {
   label: string;
@@ -45,6 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activePath, onNavigate }) => {
   const activeBg = "#4490E2";
   const activeColor = "#FFFFFF";
   const inactiveColor = "#F5F7FA";
+  const { logout } = useAuth();
 
   return (
     <Box
@@ -68,28 +71,52 @@ export const Sidebar: React.FC<SidebarProps> = ({ activePath, onNavigate }) => {
         </Text>
       </Flex>
 
-      <VStack spacing={1} align="stretch" p={4}>
-        {menuItems.map((item) => {
-          const isActive = activePath === item.path;
-          return (
-            <Flex
-              key={item.path}
-              align="center"
-              p={3}
-              borderRadius="md"
-              cursor="pointer"
-              bg={isActive ? activeBg : "transparent"}
-              color={isActive ? activeColor : inactiveColor}
-              _hover={{
-                bg: isActive ? activeBg : "whiteAlpha.100",
-              }}
-              onClick={() => onNavigate(item.path)}
-            >
-              <Icon as={item.icon} mr={3} fontSize="16px" />
-              <Text fontSize="16px">{item.label}</Text>
-            </Flex>
-          );
-        })}
+      <VStack
+        spacing={1}
+        align="stretch"
+        p={4}
+        h="calc(100vh - 56px)"
+        position="relative"
+      >
+        <Box flex="1">
+          {menuItems.map((item) => {
+            const isActive = activePath === item.path;
+            return (
+              <Flex
+                key={item.path}
+                align="center"
+                p={3}
+                borderRadius="md"
+                cursor="pointer"
+                bg={isActive ? activeBg : "transparent"}
+                color={isActive ? activeColor : inactiveColor}
+                _hover={{
+                  bg: isActive ? activeBg : "whiteAlpha.100",
+                }}
+                onClick={() => onNavigate(item.path)}
+              >
+                <Icon as={item.icon} mr={3} fontSize="16px" />
+                <Text fontSize="16px">{item.label}</Text>
+              </Flex>
+            );
+          })}
+        </Box>
+
+        <Flex
+          align="center"
+          p={3}
+          borderRadius="md"
+          cursor="pointer"
+          color={inactiveColor}
+          _hover={{
+            bg: "whiteAlpha.100",
+          }}
+          onClick={logout}
+          mt="auto"
+        >
+          <Icon as={FiLogOut} mr={3} fontSize="16px" />
+          <Text fontSize="16px">Déconnexion</Text>
+        </Flex>
       </VStack>
     </Box>
   );
