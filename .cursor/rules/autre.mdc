@@ -1,0 +1,23 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## 5️⃣ Contrat d’API & documentation  
+- Toute modification ou ajout d’endpoint doit :  
+  1. Mettre à jour `openapi.yaml`  
+  2. Mettre à jour la doc Swagger UI  
+  3. Ajouter un test d’intégration validant le spec
+
+## 6️⃣ Gestion des config & secrets  
+- **Jamais** toucher au fichier `.env`.  
+- Modèles de config versionnés dans `.env.example` uniquement.  
+- Charger la config avec `python-dotenv` ou `import.meta.env` (Vite).
+
+## 7️⃣ Verrouillage des fonctionnalités validées  
+- Une fois un test validé et fusionné en `main`, **interdiction** de modifier le code lié à cette feature.  
+- Toute correction ou évolution doit passer par :  
+  1. Création d’une nouvelle feature (branche et tests)  
+  2. Nouvelle PR, revue et tests verts  
+- Toute modification en dehors de ce process est **strictement interdite**.
+
