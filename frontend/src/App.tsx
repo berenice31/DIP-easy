@@ -3,6 +3,8 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const theme = createTheme({
   palette: {
@@ -23,6 +25,14 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </ThemeProvider>
