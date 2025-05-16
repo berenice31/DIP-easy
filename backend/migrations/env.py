@@ -11,7 +11,17 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from app.core.config import settings
 from app.db.base import Base
-from app.models.user import User  # Import all models here
+from app.models.user import User
+from app.models.product import Product
+from app.models.ingredient import Ingredient
+from app.models.attachment import Attachment
+from app.models.stability_test import StabilityTest
+from app.models.compatibility_test import CompatibilityTest
+from app.models.template import Template
+from app.models.generation import Generation
+from app.models.task import Task
+from app.models.log import Log
+from app.models.setting import Setting
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

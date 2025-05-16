@@ -30,6 +30,7 @@ export const useAuthStore = create<AuthState>()(
           password,
         });
         const { access_token, user } = response.data;
+        localStorage.setItem("token", access_token);
         set({ user, token: access_token, isAuthenticated: true });
         axios.defaults.headers.common[
           "Authorization"
@@ -44,6 +45,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        localStorage.removeItem("token");
         set({ user: null, token: null, isAuthenticated: false });
         delete axios.defaults.headers.common["Authorization"];
       },

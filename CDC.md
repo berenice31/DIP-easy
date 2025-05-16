@@ -99,6 +99,8 @@ DIP-easy/
 
 - [x] Interface d'authentification (UI/UX, navigation, intégration API) — **Validée (tests manuels OK)**
 - [x] Logo et identité visuelle intégrés sur la page de connexion
+- [x] Menu de navigation responsive avec logo pleine largeur
+- [x] Bouton de déconnexion intégré au menu
 - [x] Dashboard utilisateur (structure de base)
 - [ ] Gestion des DIP
 - [ ] Interface d'administration

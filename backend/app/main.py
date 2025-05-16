@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.v1.endpoints import auth
+from app.api.v1.api import api_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -11,10 +11,13 @@ app = FastAPI(
 
 # Configuration CORS
 origins = [
-    "http://localhost:3000",  # React frontend
-    "http://localhost:5173",  # Vite frontend
-    "http://localhost:8000",  # Backend
-]
+       "http://localhost:3000",
+       "http://localhost:5173",
+       "http://localhost:8000",
+       "http://127.0.0.1:3000",
+       "http://127.0.0.1:5173",
+       "http://127.0.0.1:8000"
+   ]
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,7 +28,7 @@ app.add_middleware(
 )
 
 # Inclusion des routes
-app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
