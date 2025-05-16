@@ -1,345 +1,259 @@
 # Cahier des Charges - DIP-easy
 
-## 1. Vue d'ensemble
+## 1. Introduction
 
-DIP-easy est une plateforme web moderne pour la génération et la gestion de Dossiers d'Information Produit (DIP) pour les produits cosmétiques. La plateforme vise à simplifier et standardiser le processus de création des DIP tout en assurant la conformité avec les réglementations en vigueur.
+### 1.1 Contexte
+
+DIP-easy est une application web moderne conçue pour simplifier et accélérer la création et la gestion des Dossiers d'Information Produit (DIP) dans l'industrie cosmétique. L'application vise à remplacer les processus manuels et les documents Excel par une solution numérique intégrée.
+
+### 1.2 Objectifs
+
+- Automatiser la création et la gestion des DIP
+- Standardiser le format des documents
+- Faciliter la collaboration entre les équipes
+- Assurer la conformité réglementaire
+- Réduire les erreurs humaines
+- Améliorer la traçabilité
 
 ## 2. Architecture Technique
 
 ### 2.1 Stack Technologique
 
-- **Backend**: FastAPI (Python 3.11+)
-- **Frontend**: React avec TypeScript
+- **Frontend**: React 18 avec TypeScript
+- **Backend**: Node.js avec Express
 - **Base de données**: PostgreSQL
-- **Authentification**: JWT (JSON Web Tokens)
-- **Tests**: Pytest
-- **Documentation API**: Swagger/OpenAPI
+- **ORM**: Prisma
+- **UI Framework**: Material-UI (MUI)
+- **Authentification**: JWT
+- **API**: RESTful
 
 ### 2.2 Structure du Projet
 
 ```
-DIP-easy/
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── v1/
-│   │   │       ├── endpoints/
-│   │   │       │   ├── auth.py
-│   │   │       │   ├── users.py
-│   │   │       │   └── dashboard.py
-│   │   │       └── api.py
-│   │   ├── core/
-│   │   │   ├── config.py
-│   │   │   └── security.py
-│   │   ├── crud/
-│   │   │   ├── base.py
-│   │   │   └── crud_user.py
-│   │   ├── db/
-│   │   │   ├── base.py
-│   │   │   └── base_class.py
-│   │   ├── models/
-│   │   │   └── user.py
-│   │   └── schemas/
-│   │       └── user.py
-│   └── tests/
-│       └── test_auth.py
-└── frontend/
+dip-easy/
+├── frontend/               # Application React
+│   ├── src/
+│   │   ├── components/    # Composants réutilisables
+│   │   ├── pages/        # Pages de l'application
+│   │   ├── services/     # Services API
+│   │   ├── hooks/        # Hooks personnalisés
+│   │   ├── types/        # Types TypeScript
+│   │   └── utils/        # Utilitaires
+│   └── public/           # Assets statiques
+└── backend/              # Serveur Node.js
     ├── src/
-    │   ├── components/
-    │   │   ├── auth/
-    │   │   │   ├── Login.tsx
-    │   │   │   ├── Register.tsx
-    │   │   │   └── ProtectedRoute.tsx
-    │   │   └── common/
-    │   ├── pages/
-    │   │   └── Dashboard.tsx
-    │   └── services/
-    │       ├── api.ts
-    │       └── dashboard.ts
-    └── public/
+    │   ├── controllers/  # Contrôleurs
+    │   ├── models/      # Modèles Prisma
+    │   ├── routes/      # Routes API
+    │   ├── services/    # Logique métier
+    │   └── utils/       # Utilitaires
+    └── prisma/          # Schéma et migrations
 ```
 
-## 3. Fonctionnalités Implémentées
+## 3. Fonctionnalités Principales
 
-### 3.1 Authentification ✅
+### 3.1 Gestion des DIP
 
-- [x] Système d'inscription utilisateur
-- [x] Connexion avec JWT
-- [x] Gestion des rôles (admin, editor, viewer)
-- [x] Validation des données utilisateur
-- [x] Tests unitaires d'authentification
-- [x] Protection des routes authentifiées
-- [x] Gestion des tokens dans le localStorage
-- [x] Intercepteurs Axios pour l'authentification
+- Création de nouveaux DIP
+- Édition des DIP existants
+- Versionnement des DIP
+- Historique des modifications
+- Export PDF
+- Validation et approbation
 
-### 3.2 Base de Données ✅
+### 3.2 Interface Utilisateur
 
-- [x] Configuration PostgreSQL
-- [x] Modèles SQLAlchemy
-- [x] Migrations avec Alembic
-- [x] Tests de base de données
-- [x] Extension uuid-ossp pour la génération d'UUID
-- [x] Gestion des contraintes de clés étrangères
+- Dashboard personnalisé
+- Navigation intuitive
+- Formulaires dynamiques
+- Grilles de données interactives
+- Notifications en temps réel
+- Thème sombre/clair
 
-### 3.3 Backend ✅
+### 3.3 Gestion des Utilisateurs
 
-- [x] Configuration FastAPI
-- [x] Système de routage API v1
-- [x] Gestion des dépendances
-- [x] Middleware CORS
-- [x] Endpoints d'authentification
-- [x] Endpoints utilisateurs
-- [x] Endpoint dashboard
-- [x] CRUD générique
-- [x] Validation des schémas avec Pydantic
+- Authentification sécurisée
+- Rôles et permissions
+- Profils utilisateurs
+- Historique des connexions
+- Gestion des sessions
 
-## 4. Fonctionnalités en Cours
+### 3.4 Fonctionnalités Avancées
 
-### 4.1 Frontend (En cours)
+- Templates personnalisables
+- Génération automatique de contenu
+- Import/Export de données
+- Recherche avancée
+- Filtres et tri
+- Rapports et statistiques
 
-- [x] Interface d'authentification (UI/UX, navigation, intégration API) — **Validée (tests manuels OK)**
-- [x] Logo et identité visuelle intégrés sur la page de connexion
-- [x] Menu de navigation responsive avec logo pleine largeur
-- [x] Bouton de déconnexion intégré au menu
-- [x] Dashboard utilisateur (structure de base)
-- [ ] Gestion des DIP
-- [ ] Interface d'administration
+## 4. Modèles de Données
 
-### 4.2 Gestion des DIP (À venir)
+### 4.1 DIP (Dossier d'Information Produit)
 
-- [ ] Création de DIP
-- [ ] Templates de DIP
-- [ ] Validation des données
-- [ ] Export PDF
+```typescript
+interface DipForm {
+  id: string;
+  version: number;
+  status: "draft" | "pending" | "approved" | "rejected";
+  lastSaved: Date;
+  steps: {
+    productInfo: {
+      completed: boolean;
+      data: ProductInfo;
+    };
+    formula: {
+      completed: boolean;
+      data: Formula;
+    };
+    // ... autres étapes
+  };
+}
+```
 
-## 5. Prochaines Étapes
+### 4.2 Utilisateur
 
-### 5.1 Court Terme
+```typescript
+interface User {
+  id: string;
+  email: string;
+  role: "admin" | "user" | "viewer";
+  profile: UserProfile;
+  preferences: UserPreferences;
+}
+```
 
-1. ~~Implémentation du frontend d'authentification~~ ✅
-2. ~~Création des composants de base~~ ✅
-3. ~~Intégration avec l'API backend~~ ✅
-4. ~~Tests d'intégration~~ ✅
-5. Implémentation des fonctionnalités du dashboard
-6. Création des composants de gestion des DIP
+## 5. API Endpoints
 
-### 5.2 Moyen Terme
+### 5.1 DIP
 
-1. Développement des fonctionnalités de gestion des DIP
-2. Implémentation des templates
-3. Système de validation
-4. Gestion des documents
+- `GET /api/dips` - Liste des DIP
+- `GET /api/dips/:id` - Détails d'un DIP
+- `POST /api/dips` - Création d'un DIP
+- `PUT /api/dips/:id` - Mise à jour d'un DIP
+- `DELETE /api/dips/:id` - Suppression d'un DIP
 
-### 5.3 Long Terme
+### 5.2 Utilisateurs
 
-1. Fonctionnalités avancées de reporting
-2. Intégration avec d'autres systèmes
-3. Optimisation des performances
-4. Fonctionnalités collaboratives
+- `POST /api/auth/login` - Connexion
+- `POST /api/auth/logout` - Déconnexion
+- `GET /api/users/me` - Profil utilisateur
+- `PUT /api/users/me` - Mise à jour du profil
 
 ## 6. Sécurité
 
-### 6.1 Implémenté ✅
+### 6.1 Authentification
 
-- [x] Authentification JWT
-- [x] Hachage des mots de passe
-- [x] Validation des données
-- [x] Gestion des rôles
-- [x] Protection des routes authentifiées
-- [x] Gestion sécurisée des tokens
-- [x] Configuration CORS
+- JWT avec refresh tokens
+- Sessions sécurisées
+- Protection CSRF
+- Rate limiting
 
-### 6.2 À Implémenter
+### 6.2 Autorisation
 
-- [ ] 2FA (Two-Factor Authentication)
-- [ ] Rate limiting
-- [ ] Audit logs
-- [ ] Politique de mots de passe
+- RBAC (Role-Based Access Control)
+- Permissions granulaire
+- Validation des données
+- Sanitization des entrées
 
-## 7. Tests
+## 7. Performance
 
-### 7.1 Implémentés ✅
+### 7.1 Optimisations
 
-- [x] Tests d'authentification
-- [x] Tests de validation
-- [x] Tests de base de données
-- [x] Tests de connexion à la base de données
-- [x] Tests des migrations
+- Lazy loading des composants
+- Code splitting
+- Caching des données
+- Pagination des résultats
+- Compression des assets
 
-### 7.2 À Implémenter
+### 7.2 Monitoring
 
-- [ ] Tests d'intégration
-- [ ] Tests end-to-end
-- [ ] Tests de performance
-- [ ] Tests de sécurité
+- Logs d'erreurs
+- Métriques de performance
+- Alertes automatiques
+- Tableaux de bord
 
-## 8. Documentation
+## 8. Déploiement
 
-### 8.1 Implémentée ✅
+### 8.1 Environnements
 
-- [x] Documentation API (Swagger)
-- [x] Documentation d'installation
-- [x] Structure du projet
-- [x] Configuration de la base de données
-- [x] Gestion des migrations
+- Développement
+- Staging
+- Production
 
-### 8.2 À Implémenter
+### 8.2 CI/CD
 
-- [ ] Guide utilisateur
-- [ ] Documentation technique
-- [ ] Guide de contribution
-- [ ] Documentation de déploiement
+- Tests automatisés
+- Build automatique
+- Déploiement continu
+- Rollback automatique
 
-## 9. Déploiement
+## 9. Maintenance
 
-### 9.1 Configuration
+### 9.1 Documentation
 
-- [x] Environnement de développement
-- [ ] Environnement de test
-- [ ] Environnement de production
+- Documentation technique
+- Guide utilisateur
+- API documentation
+- Changelog
 
-### 9.2 Infrastructure
+### 9.2 Support
 
-- [x] Serveur web (FastAPI)
-- [x] Base de données (PostgreSQL)
-- [ ] Cache
-- [ ] Stockage de fichiers
+- Système de tickets
+- FAQ
+- Base de connaissances
+- Support technique
 
-## 10. Maintenance
+## 10. Évolutions Futures
 
-### 10.1 Monitoring
+### 10.1 Fonctionnalités Planifiées
 
-- [x] Logs de base
-- [ ] Métriques
-- [ ] Alertes
-- [ ] Performance
+- Application mobile
+- API publique
+- Intégrations tierces
+- IA/ML pour suggestions
 
-### 10.2 Mises à jour
+### 10.2 Améliorations
 
-- [x] Gestion des versions
-- [ ] Sécurité
-- [ ] Fonctionnalités
-- [ ] Corrections de bugs
+- Performance
+- UX/UI
+- Sécurité
+- Scalabilité
 
-## 11. Composants Communs
+## 11. Notes Techniques
 
-### 11.1 Composants de Base
+### 11.1 Bonnes Pratiques
 
-#### 11.1.1 Table ✅
+- Code propre et maintenable
+- Tests unitaires et d'intégration
+- Documentation à jour
+- Revue de code
 
-- Tableau de données avec tri et pagination
-- Support pour les colonnes personnalisables
-- États de chargement et d'erreur
-- Pagination intégrée
-- Tri des colonnes
-- Styles Tailwind CSS
+### 11.2 Standards
 
-#### 11.1.2 Modal ✅
+- ESLint
+- Prettier
+- Git Flow
+- Semantic Versioning
 
-- Fenêtre modale réutilisable
-- Différentes tailles (sm, md, lg, xl, full)
-- Animations d'entrée/sortie
-- Composants ModalHeader, ModalBody, ModalFooter
-- Gestion du focus et de l'accessibilité
+## 12. Dernières Modifications
 
-#### 11.1.3 Authentification ✅
+### 12.1 Corrections de Bugs
 
-- Composant Login
-- Composant Register
-- Composant ProtectedRoute
-- Gestion des tokens
-- Redirection automatique
-- Gestion des erreurs
-- Validation des formulaires
+- Correction de l'affichage des données dans la grille des produits
+  - Mapping à plat des champs pour la DataGrid
+  - Suppression des valueGetters redondants
+  - Conversion des IDs en string pour la compatibilité MUI
 
-#### 11.1.4 Notification ✅
+### 12.2 Améliorations
 
-- Système de notification avec différents types (success, error, warning, info)
-- Durée automatique de fermeture
-- Animations fluides
-- Support pour les icônes
-- NotificationGroup pour gérer plusieurs notifications
-- Styles Tailwind CSS
+- Optimisation des performances de la grille
+- Meilleure gestion des données nulles/undefined
+- Amélioration de l'expérience utilisateur
 
-#### 11.1.5 Loading ✅
+### 12.3 Prochaines Étapes
 
-- Indicateurs de chargement avec différentes tailles
-- Variantes de couleur
-- Mode plein écran
-- LoadingOverlay pour les composants
-- LoadingButton pour les actions
-- LoadingDots pour les états de chargement simples
-- Styles Tailwind CSS
-
-#### 11.1.6 Card ✅
-
-- Carte avec différentes variantes (default, bordered, elevated)
-- Support pour titre, sous-titre et footer
-- CardGrid pour l'organisation en grille
-- Composants CardHeader, CardContent, CardFooter
-- Styles Tailwind CSS
-
-#### 11.1.7 Badge ✅
-
-- Badge avec différentes variantes (primary, success, warning, danger, info)
-- Différentes tailles (sm, md, lg)
-- Option pour les badges arrondis
-- BadgeGroup pour grouper les badges
-- BadgeWithIcon pour ajouter des icônes
-- BadgeWithDot pour les indicateurs
-- Styles Tailwind CSS
-
-#### 11.1.8 Dropdown ✅
-
-- Menu déroulant avec alignement personnalisable
-- Différentes largeurs (sm, md, lg, xl)
-- Composants DropdownItem, DropdownDivider, DropdownHeader
-- Support pour les icônes
-- Gestion du focus et de l'accessibilité
-- Styles Tailwind CSS
-
-#### 11.1.9 Pagination ✅
-
-- Navigation entre les pages
-- Affichage des numéros de page
-- Boutons premier/dernier page
-- Gestion des ellipses pour les longues séquences
-- Styles Tailwind CSS
-
-#### 11.1.10 Search ✅
-
-- Champ de recherche avec debounce
-- Longueur minimale configurable
-- Bouton de suppression
-- SearchWithFilters pour ajouter des filtres
-- SearchWithResults pour afficher les résultats
-- Styles Tailwind CSS
-
-#### 11.1.11 Filter ✅
-
-- Filtres avec sélection simple ou multiple
-- Support pour les icônes
-- FilterGroup pour grouper les filtres
-- FilterChips pour afficher les filtres actifs
-- Styles Tailwind CSS
-
-#### 11.1.12 Sort ✅
-
-- Tri avec direction (asc/desc)
-- Support pour plusieurs options de tri
-- SortGroup pour grouper les tris
-- SortChip pour afficher le tri actif
-- Styles Tailwind CSS
-
-### 11.2 Caractéristiques Communes
-
-- Typés avec TypeScript
-- Stylisés avec Tailwind CSS
-- Accessibles (ARIA)
-- Réutilisables et personnalisables
-- Intégrés avec Headless UI
-- Responsifs
-- Animations fluides
-- Gestion des états
-- Support pour les thèmes
-- Documentation des props
+- Implémentation de la pagination côté serveur
+- Ajout de filtres avancés
+- Optimisation des requêtes API
+- Amélioration de la gestion du cache
