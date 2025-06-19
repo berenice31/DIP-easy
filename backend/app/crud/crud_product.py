@@ -6,16 +6,17 @@ from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.models.product import Product
-from app.schemas.product import ProductCreate, ProductUpdate
+from app.schemas.product import ProductCreate, ProductUpdate, ProductStatus
 from app.models import Ingredient, StabilityTest, CompatibilityTest
 
 class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
     def create(self, db: Session, *, obj_in: ProductCreate, user_id: UUID) -> Product:
-        obj_in_data = jsonable_encoder(obj_in)
+        # Utiliser dict() pour conserver les objets date/datetime
+        obj_in_data = obj_in.dict()
         # Séparer les repeaters
         ingredients_data = obj_in_data.pop("ingredients", [])
-        stabilites_data = obj_in_data.pop("stabilites", [])
-        compatibilites_data = obj_in_data.pop("compatibilites", [])
+        stabilites_data = obj_in_data.pop("stability_tests", obj_in_data.pop("stabilites", []))
+        compatibilites_data = obj_in_data.pop("compatibility_tests", obj_in_data.pop("compatibilites", []))
         db_obj = self.model(**obj_in_data, user_id=user_id)
         db.add(db_obj)
         db.flush()  # Pour obtenir l'id du produit
@@ -30,7 +31,9 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
             comp_obj = CompatibilityTest(**comp, product_id=db_obj.id)
             db.add(comp_obj)
         db.commit()
+        # Rafraîchir l'objet pour récupérer les nouvelles valeurs (ex. progression)
         db.refresh(db_obj)
+        # Pas besoin de refresh sous SQLite, l'objet est déjà à jour
         return db_obj
 
     def update(
@@ -47,13 +50,12 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
             update_data = obj_in.dict(exclude_unset=True)
         # Gestion des repeaters
         ingredients_data = update_data.pop("ingredients", None)
-        stabilites_data = update_data.pop("stabilites", None)
-        compatibilites_data = update_data.pop("compatibilites", None)
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
-        db.add(db_obj)
-        db.flush()
+        stabilites_data = update_data.pop("stability_tests", update_data.pop("stabilites", None))
+        compatibilites_data = update_data.pop("compatibility_tests", update_data.pop("compatibilites", None))
+        # Mise à jour directe via requête pour compatibilité SQLite/UUID
+        if update_data:
+            from sqlalchemy import cast, String
+            db.query(self.model).filter(cast(self.model.id, String) == str(db_obj.id)).update(update_data)
         # Synchronisation des enfants (ici simplifiée : suppression et recréation)
         if ingredients_data is not None:
             db.query(Ingredient).filter_by(product_id=db_obj.id).delete()
@@ -71,7 +73,22 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 comp_obj = CompatibilityTest(**comp, product_id=db_obj.id)
                 db.add(comp_obj)
         db.commit()
+        # Rafraîchir l'objet pour récupérer les nouvelles valeurs (ex. progression)
         db.refresh(db_obj)
+        # Pas besoin de refresh sous SQLite, l'objet est déjà à jour
+        return db_obj
+
+    def submit(self, db: Session, *, db_obj: Product) -> Product:
+        """Validate and set product status to VALIDATED"""
+        from fastapi.encoders import jsonable_encoder
+        data = jsonable_encoder(db_obj)
+        data["status"] = ProductStatus.VALIDATED
+        # Validation via Pydantic; will raise ValueError if missing fields
+        from app.schemas.product import Product as ProductSchema
+        ProductSchema(**data)
+        db_obj.status = ProductStatus.VALIDATED
+        db.add(db_obj)
+        db.commit()
         return db_obj
 
 product = CRUDProduct(Product) 

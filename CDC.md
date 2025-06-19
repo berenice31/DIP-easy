@@ -15,6 +15,19 @@ DIP-easy est une application web moderne conçue pour simplifier et accélérer 
 - Réduire les erreurs humaines
 - Améliorer la traçabilité
 
+## ✅ État d'avancement (19 juin 2025)
+
+### 19/06/2025 – Sprint « Progression & Édition »
+
+| Domaine  | Avancement                                                                                                                                                                                                                                                                                                       |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend  | • Ajout colonne `progression` (migration Alembic `a1b2c3d4e5f6`) <br>• Mise à jour du modèle `Product` & schéma Pydantic <br>• `crud_product.update()` maintenant suivi d'un `db.refresh()` pour renvoyer les valeurs à jour                                                                                     |
+| Frontend | • Calcul dynamique du pourcentage de complétude dans `NewDip.tsx` <br>• Ajout barre MUI `LinearProgress` dans le formulaire <br>• Colonne « Progression » persistante dans `Products.tsx` (affichage `%`) <br>• Flux d'édition : route `/products/:id/edit`, récupération des données et réaffectation au wizard |
+| Tests    | • Tests unitaires back mis à jour pour vérifier la persistance de `progression` <br>• Ajustements Jest pour la colonne DataGrid                                                                                                                                                                                  |
+| UX       | • Désactivation du débordement gauche (Navigation fixe 240 px) <br>• Feedback toast succès/erreur unifiés                                                                                                                                                                                                        |
+
+> Résultat : la complétude de chaque produit est maintenant calculée, stockée et affichée dans la liste des produits.
+
 ## 2. Architecture Technique
 
 ### 2.1 Stack Technologique
