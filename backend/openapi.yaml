@@ -707,6 +707,232 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
       - OAuth2PasswordBearer: []
+  /api/v1/templates/:
+    get:
+      tags:
+      - templates
+      summary: List Templates
+      operationId: list_templates_api_v1_templates__get
+      parameters:
+      - required: false
+        schema:
+          type: integer
+          title: Skip
+          default: 0
+        name: skip
+        in: query
+      - required: false
+        schema:
+          type: integer
+          title: Limit
+          default: 100
+        name: limit
+        in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Template'
+                type: array
+                title: Response List Templates Api V1 Templates  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+    post:
+      tags:
+      - templates
+      summary: Upload Template
+      description: Upload d'un fichier .docx comme nouveau modèle.
+      operationId: upload_template_api_v1_templates__post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_template_api_v1_templates__post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /api/v1/templates/{template_id}:
+    delete:
+      tags:
+      - templates
+      summary: Delete Template
+      operationId: delete_template_api_v1_templates__template_id__delete
+      parameters:
+      - required: true
+        schema:
+          type: string
+          format: uuid
+          title: Template Id
+        name: template_id
+        in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /api/v1/generations/:
+    post:
+      tags:
+      - generations
+      summary: Generate Document
+      operationId: generate_document_api_v1_generations__post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_generate_document_api_v1_generations__post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Generation'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /api/v1/generations/{generation_id}/finalize:
+    patch:
+      tags:
+      - generations
+      summary: Finalize Document
+      operationId: finalize_document_api_v1_generations__generation_id__finalize_patch
+      parameters:
+      - required: true
+        schema:
+          type: string
+          format: uuid
+          title: Generation Id
+        name: generation_id
+        in: path
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_finalize_document_api_v1_generations__generation_id__finalize_patch'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Generation'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /api/v1/admin/drive/:
+    get:
+      tags:
+      - admin
+      - admin
+      summary: Get Drive configuration
+      operationId: get_drive_config_api_v1_admin_drive__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+      - OAuth2PasswordBearer: []
+  /api/v1/admin/drive/credentials:
+    post:
+      tags:
+      - admin
+      - admin
+      summary: Upload service account JSON
+      operationId: upload_credentials_api_v1_admin_drive_credentials_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_credentials_api_v1_admin_drive_credentials_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /api/v1/admin/drive/folder:
+    post:
+      tags:
+      - admin
+      - admin
+      summary: Set Drive root folder ID
+      operationId: set_drive_folder_api_v1_admin_drive_folder_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Body_set_drive_folder_api_v1_admin_drive_folder_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
   /:
     get:
       summary: Root
@@ -719,6 +945,31 @@ paths:
               schema: {}
 components:
   schemas:
+    Body_finalize_document_api_v1_generations__generation_id__finalize_patch:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+      - file
+      title: Body_finalize_document_api_v1_generations__generation_id__finalize_patch
+    Body_generate_document_api_v1_generations__post:
+      properties:
+        template_id:
+          type: string
+          format: uuid
+          title: Template Id
+        product_id:
+          type: string
+          format: uuid
+          title: Product Id
+      type: object
+      required:
+      - template_id
+      - product_id
+      title: Body_generate_document_api_v1_generations__post
     Body_login_access_token_api_v1_auth_token_post:
       properties:
         grant_type:
@@ -746,6 +997,39 @@ components:
       - username
       - password
       title: Body_login_access_token_api_v1_auth_token_post
+    Body_set_drive_folder_api_v1_admin_drive_folder_post:
+      properties:
+        folder_id:
+          type: string
+          title: Folder Id
+      type: object
+      required:
+      - folder_id
+      title: Body_set_drive_folder_api_v1_admin_drive_folder_post
+    Body_upload_credentials_api_v1_admin_drive_credentials_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+      - file
+      title: Body_upload_credentials_api_v1_admin_drive_credentials_post
+    Body_upload_template_api_v1_templates__post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - file
+      - name
+      title: Body_upload_template_api_v1_templates__post
     CompatibilityTest:
       properties:
         test_type:
@@ -798,6 +1082,51 @@ components:
       - test_date
       - result
       title: CompatibilityTestCreate
+    Generation:
+      properties:
+        product_id:
+          type: string
+          format: uuid
+          title: Product Id
+        template_id:
+          type: string
+          format: uuid
+          title: Template Id
+        format:
+          type: string
+          title: Format
+          description: Format de sortie
+          default: docx
+        status:
+          type: string
+          title: Status
+          description: Statut de la génération
+          default: pending
+        id:
+          type: string
+          format: uuid
+          title: Id
+        drive_file_id:
+          type: string
+          title: Drive File Id
+        error_message:
+          type: string
+          title: Error Message
+        initiated_at:
+          type: string
+          format: date-time
+          title: Initiated At
+        completed_at:
+          type: string
+          format: date-time
+          title: Completed At
+      type: object
+      required:
+      - product_id
+      - template_id
+      - id
+      - initiated_at
+      title: Generation
     HTTPValidationError:
       properties:
         detail:
@@ -1017,6 +1346,24 @@ components:
       title: MenuUpdate
     Product:
       properties:
+        nom_client:
+          type: string
+          title: Nom Client
+        marque:
+          type: string
+          title: Marque
+        gamme:
+          type: string
+          title: Gamme
+        nom_produit:
+          type: string
+          title: Nom Produit
+        format:
+          type: string
+          title: Format
+        version:
+          type: string
+          title: Version
         nom_commercial:
           type: string
           title: Nom Commercial
@@ -1073,6 +1420,10 @@ components:
         effets_revendiques:
           type: string
           title: Effets Revendiques
+        progression:
+          type: integer
+          title: Progression
+          default: 0
         status:
           $ref: '#/components/schemas/ProductStatus'
         ingredients:
@@ -1114,6 +1465,24 @@ components:
       title: Product
     ProductCreate:
       properties:
+        nom_client:
+          type: string
+          title: Nom Client
+        marque:
+          type: string
+          title: Marque
+        gamme:
+          type: string
+          title: Gamme
+        nom_produit:
+          type: string
+          title: Nom Produit
+        format:
+          type: string
+          title: Format
+        version:
+          type: string
+          title: Version
         nom_commercial:
           type: string
           title: Nom Commercial
@@ -1170,6 +1539,10 @@ components:
         effets_revendiques:
           type: string
           title: Effets Revendiques
+        progression:
+          type: integer
+          title: Progression
+          default: 0
         status:
           allOf:
           - $ref: '#/components/schemas/ProductStatus'
@@ -1203,6 +1576,24 @@ components:
       description: An enumeration.
     ProductUpdate:
       properties:
+        nom_client:
+          type: string
+          title: Nom Client
+        marque:
+          type: string
+          title: Marque
+        gamme:
+          type: string
+          title: Gamme
+        nom_produit:
+          type: string
+          title: Nom Produit
+        format:
+          type: string
+          title: Format
+        version:
+          type: string
+          title: Version
         nom_commercial:
           type: string
           title: Nom Commercial
@@ -1259,6 +1650,10 @@ components:
         effets_revendiques:
           type: string
           title: Effets Revendiques
+        progression:
+          type: integer
+          title: Progression
+          default: 0
         status:
           allOf:
           - $ref: '#/components/schemas/ProductStatus'
@@ -1335,6 +1730,44 @@ components:
       - test_date
       - result
       title: StabilityTestCreate
+    Template:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Nom logique du modèle
+        version:
+          type: string
+          title: Version
+          description: Version du modèle
+        drive_file_id:
+          type: string
+          title: Drive File Id
+          description: ID du fichier sur Google Drive
+        thumbnail_url:
+          type: string
+          title: Thumbnail Url
+        id:
+          type: string
+          format: uuid
+          title: Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - name
+      - version
+      - drive_file_id
+      - id
+      - created_at
+      - updated_at
+      title: Template
     Token:
       properties:
         access_token:

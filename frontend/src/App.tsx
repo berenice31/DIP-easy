@@ -13,6 +13,7 @@ import ProductDetail from "./pages/ProductDetail";
 import ProductEdit from "./pages/ProductEdit";
 import GeneratePage from "./pages/Generate";
 import Templates from "./pages/Templates";
+import AdminPage from "./pages/Admin";
 
 const theme = createTheme({
   palette: {
@@ -95,6 +96,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Templates />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminPage />
             </ProtectedRoute>
           }
         />

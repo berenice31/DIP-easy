@@ -1,20 +1,17 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, CheckConstraint, text
+from sqlalchemy import Column, String, DateTime, ForeignKey, text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.sql import func
 from app.db.base import Base
 
 class Generation(Base):
     __tablename__ = "generations"
-    __table_args__ = (
-        CheckConstraint("format IN ('docx','pdf')", name="chk_generation_format"),
-        CheckConstraint("status IN ('pending','success','error')", name="chk_generation_status"),
-    )
 
     id = Column(PGUUID, primary_key=True, server_default=text("uuid_generate_v4()"))
     product_id = Column(PGUUID, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
     template_id = Column(PGUUID, ForeignKey("templates.id", ondelete="CASCADE"), nullable=False)
-    format = Column(String, nullable=False)
+    # DB column conservé sous le nom "format" pour compatibilité PostgreSQL existant
+    format = Column("format", String, nullable=False)
     drive_file_id = Column(String, nullable=True)
     status = Column(String, nullable=False)
     error_message = Column(String, nullable=True)
@@ -26,4 +23,9 @@ class Generation(Base):
 
     product = relationship("Product", backref="generations")
     template = relationship("Template", backref="generations")
-    tasks = relationship("Task", back_populates="generation") 
+    tasks = relationship("Task", back_populates="generation")
+
+    # Alias pythonic pour clarification (utilisé côté API/tests)
+    file_format = synonym("format")
+
+    # Les propriétés ci-dessous ne sont plus nécessaires : synonym gère déjà l'alias 

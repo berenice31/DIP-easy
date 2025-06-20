@@ -22,9 +22,16 @@ async def upload_template(
     if not file.filename.endswith(".docx"):
         raise HTTPException(status_code=400, detail="Seuls les fichiers .docx sont acceptés")
     drive_file_id = google_drive_service.upload(file.file, file.filename)
+    thumb_url = google_drive_service.get_thumbnail_url(drive_file_id)
     template_in = schemas.TemplateCreate(name=name, file_name=file.filename)
     try:
-        template = crud.template.create_with_file(db, obj_in=template_in, drive_file_id=drive_file_id)
+        template = crud.template.create_with_file(
+            db, obj_in=template_in, drive_file_id=drive_file_id
+        )
+        template.thumbnail_url = thumb_url
+        db.add(template)
+        db.commit()
+        db.refresh(template)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     return template
@@ -50,6 +57,7 @@ def delete_template(
     template = crud.template.get(db, id=str(template_id))
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
-    # TODO: supprimer fichier drive si besoin
+    # Supprimer le fichier sur Google Drive (silencieux si Drive non configuré)
+    google_drive_service.delete(template.drive_file_id)
     template = crud.template.remove(db, id=str(template_id))
     return template 

@@ -10,7 +10,11 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../services/api";
+import { storage } from "../../utils/storage";
 import logo from "../../assets/logo-dipeasy.jpg";
+
+const TOKEN_KEY = "token";
+const REFRESH_TOKEN_KEY = "refresh_token";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +28,10 @@ const Login: React.FC = () => {
     try {
       const response = await authService.login(email, password);
       if (response && response.access_token) {
-        localStorage.setItem("token", response.access_token);
+        storage.set(TOKEN_KEY, response.access_token);
+        if (response.refresh_token) {
+          storage.set(REFRESH_TOKEN_KEY, response.refresh_token);
+        }
         navigate("/dashboard");
       } else {
         setError("Identifiants invalides");

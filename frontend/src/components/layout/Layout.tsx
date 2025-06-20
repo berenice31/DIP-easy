@@ -16,7 +16,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
           flexGrow: 1,
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
         }}
       >
         <Container maxWidth="lg">{children}</Container>

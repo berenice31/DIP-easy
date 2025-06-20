@@ -1,4 +1,4 @@
-import sys, os, pathlib
+import sys, os, pathlib, uuid
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 BACKEND_DIR = BASE_DIR  # backend folder
 if str(BACKEND_DIR) not in sys.path:
@@ -45,6 +45,42 @@ def _register_uuid(conn, record):
     conn.create_function("uuid_generate_v4", 0, lambda: str(_uuid.uuid4()))
     conn.create_function("gen_random_uuid", 0, lambda: str(_uuid.uuid4()))
 
+# ---------------------------------------------------------------------------
+# Compatibilité SQLite : activer les contraintes FK et ignorer les server_default
+# ---------------------------------------------------------------------------
+
+# Active les contraintes ON DELETE CASCADE
+@event.listens_for(engine, "connect")
+def _set_sqlite_pragma(dbapi_connection, record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
+# Supprime les server_default (ex: uuid_generate_v4()) non reconnues par SQLite
+@event.listens_for(Base.metadata, "before_create")
+def _adjust_columns_for_sqlite(metadata, connection, **kw):
+    """Neutralise server defaults & onupdate which SQLite ne gère pas, et rendre les colonnes nullable."""
+    if connection.dialect.name != "sqlite":
+        return
+    for table in metadata.tables.values():
+        for column in table.columns:
+            if column.server_default is not None:
+                column.server_default = None
+                column.nullable = True
+
+            if column.default is not None:
+                column.default = None
+                column.nullable = True
+
+            if getattr(column, "onupdate", None):
+                column.onupdate = None
+
+            # Ajoute un default Python pour les clés primaires UUID (évite NULL id)
+            if column.primary_key and column.default is None and column.server_default is None:
+                from sqlalchemy import ColumnDefault
+                column.default = ColumnDefault(lambda _u=uuid: str(_u.uuid4()))
+                column.nullable = False
+
 @pytest.fixture(scope="function")
 def db():
     # Création uniquement des tables nécessaires à ces tests
@@ -62,7 +98,7 @@ def client(db):
         try:
             yield db
         finally:
-            db.close()
+            pass
     
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:

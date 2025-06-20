@@ -1,6 +1,10 @@
 import axios from "axios";
+import { storage } from "../utils/storage";
 
 const API_URL = "http://localhost:8000/api/v1";
+
+const TOKEN_KEY = "token";
+const REFRESH_TOKEN_KEY = "refresh_token";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -24,8 +28,11 @@ function isTokenExpired(token: string | null): boolean {
 // Intercepteur pour ajouter le token aux requêtes
 api.interceptors.request.use(
   async (config) => {
-    let token = localStorage.getItem("token");
-    const refreshToken = localStorage.getItem("refresh_token");
+    let token = storage.get<string | null>(TOKEN_KEY, null as any);
+    const refreshToken = storage.get<string | null>(
+      REFRESH_TOKEN_KEY,
+      null as any
+    );
     // Si le token est expiré mais qu'on a un refresh token, tente un refresh proactif
     if (token && isTokenExpired(token) && refreshToken) {
       try {
@@ -33,11 +40,11 @@ api.interceptors.request.use(
           refresh_token: refreshToken,
         });
         const { access_token } = response.data;
-        localStorage.setItem("token", access_token);
+        storage.set(TOKEN_KEY, access_token);
         token = access_token;
       } catch (refreshError) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("refresh_token");
+        storage.remove(TOKEN_KEY);
+        storage.remove(REFRESH_TOKEN_KEY);
         alert("Votre session a expiré. Merci de vous reconnecter.");
         window.location.href = "/login";
         throw refreshError;
@@ -64,7 +71,10 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem("refresh_token");
+        const refreshToken = storage.get<string | null>(
+          REFRESH_TOKEN_KEY,
+          null as any
+        );
         if (!refreshToken) {
           throw new Error("No refresh token available");
         }
@@ -74,14 +84,14 @@ api.interceptors.response.use(
         });
         const { access_token } = response.data;
 
-        localStorage.setItem("token", access_token);
+        storage.set(TOKEN_KEY, access_token);
         originalRequest.headers.Authorization = `Bearer ${access_token}`;
 
         return api(originalRequest);
       } catch (refreshError) {
         // Si le rafraîchissement échoue, on déconnecte l'utilisateur
-        localStorage.removeItem("token");
-        localStorage.removeItem("refresh_token");
+        storage.remove(TOKEN_KEY);
+        storage.remove(REFRESH_TOKEN_KEY);
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
