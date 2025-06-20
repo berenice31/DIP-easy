@@ -3,6 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.db.base_class import Base
+from sqlalchemy import cast, String
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -19,7 +20,21 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.model = model
 
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == id).first()
+        # SQLite stocke les UUID sous forme de chaînes ; on convertit donc si nécessaire
+        if isinstance(id, (str, bytes)):
+            lookup_id = id
+        else:
+            try:
+                # Tentative de conversion en chaîne pour compatibilité SQLite
+                import uuid as _uuid
+                lookup_id = str(id) if isinstance(id, _uuid.UUID) else id
+            except Exception:
+                lookup_id = id
+        return (
+            db.query(self.model)
+            .filter(cast(self.model.id, String) == lookup_id)
+            .first()
+        )
 
     def get_multi(
         self, db: Session, *, skip: int = 0, limit: int = 100
@@ -55,7 +70,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_obj
 
     def remove(self, db: Session, *, id: Any) -> ModelType:
-        obj = db.query(self.model).get(id)
+        obj = (
+            db.query(self.model)
+            .filter(cast(self.model.id, String) == (str(id) if not isinstance(id, str) else id))
+            .first()
+        )
         db.delete(obj)
         db.commit()
         return obj 

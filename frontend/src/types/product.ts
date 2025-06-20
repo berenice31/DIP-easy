@@ -15,16 +15,17 @@ export interface Product {
 }
 
 export interface CreateProductRequest {
-  nom_commercial: string;
-  fournisseur: string;
-  ref_formule: string;
+  nom_commercial?: string;
+  fournisseur?: string;
+  ref_formule?: string;
   ref_produit?: string;
-  date_mise_marche: string;
-  resp_mise_marche: string;
-  faconnerie: string;
+  date_mise_marche?: string | null;
+  resp_mise_marche?: string;
+  faconnerie?: string;
   pc_ph?: number;
   pc_densite?: number;
   pc_organoleptiques?: string;
+  status?: "DRAFT" | "VALIDATED";
 }
 
 export interface UpdateProductRequest extends Partial<CreateProductRequest> {

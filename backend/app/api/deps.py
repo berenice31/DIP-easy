@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from app.db.base import get_db
 from app.core.security import verify_token
 from app.models.user import User
+from app.core.config import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/token")
 
 def get_current_user(
     db: Session = Depends(get_db),

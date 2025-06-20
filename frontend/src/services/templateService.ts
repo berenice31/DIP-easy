@@ -158,6 +158,16 @@ class TemplateService {
       throw error;
     }
   }
+
+  async uploadTemplate(name: string, file: File) {
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("file", file);
+    const response = await api.post(this.baseUrl + "/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  }
 }
 
 export const templateService = new TemplateService();

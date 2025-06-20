@@ -28,6 +28,17 @@ DIP-easy est une application web moderne conçue pour simplifier et accélérer 
 
 > Résultat : la complétude de chaque produit est maintenant calculée, stockée et affichée dans la liste des produits.
 
+### 20/06/2025 – Sprint « Template & Génération »
+
+| Domaine  | Avancement                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend  | • Nouvelles tables & schémas : `templates`, `generations` <br>• CRUD `crud_template`, `crud_generation` <br>• Endpoints REST : `/templates` (upload, list, delete, versioning) et `/generations` (generate, finalize) <br>• Services : stub `google_drive_service`, `docx_service` <br>• Tests d'intégration Pytest : `test_templates.py`, `test_generations.py` <br>• Mise à jour du routeur FastAPI et du `openapi.yaml` (à générer) |
+| Frontend | • Service API `templateService.uploadTemplate`, `generationService` <br>• Page `/templates` : upload .docx, listing, suppression, aperçu nom de fichier <br>• Page `/generate` : sélection modèle & produit, génération, upload final, validation <br>• Routing ajouté dans `App.tsx`                                                                                                                                                  |
+| Tests    | • Couverture Jest/React Testing Library pour les nouvelles pages (à compléter)                                                                                                                                                                                                                                                                                                                                                         |
+| UX       | • Affichage immédiat du nom du fichier importé <br>• Confirmation de suppression de modèle                                                                                                                                                                                                                                                                                                                                             |
+
+> Résultat : les utilisateurs peuvent importer des modèles Word (.docx), gérer les versions, générer un document prérempli à partir d'un produit puis téléverser la version finale – le produit passe automatiquement au statut « VALIDATED ».
+
 ## 2. Architecture Technique
 
 ### 2.1 Stack Technologique

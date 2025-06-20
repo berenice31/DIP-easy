@@ -1,12 +1,13 @@
-from sqlalchemy import Column, String, Float, ForeignKey, text
+from sqlalchemy import Column, String, Float, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from app.db.base import Base
 
 class Ingredient(Base):
     __tablename__ = "ingredients"
 
-    id = Column(PGUUID, primary_key=True, server_default=text("uuid_generate_v4()"))
+    id = Column(PGUUID, primary_key=True, server_default=func.gen_random_uuid())
     product_id = Column(PGUUID, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
     ingr_nom_inci = Column(String, nullable=False)
     ingr_fonction = Column(String, nullable=False)

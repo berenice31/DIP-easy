@@ -7,7 +7,7 @@ from sqlalchemy.sql import func
 class StabilityTest(Base):
     __tablename__ = "stability_tests"
 
-    id = Column(PGUUID, primary_key=True, server_default=text("uuid_generate_v4()"))
+    id = Column(PGUUID, primary_key=True, server_default=func.gen_random_uuid())
     product_id = Column(PGUUID, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
     test_type = Column(String, nullable=False)
     test_date = Column(DateTime(timezone=True), nullable=False)

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, constr
-from typing import Optional
+from typing import Optional, Union
 from datetime import datetime
 from uuid import UUID
 
@@ -20,21 +20,27 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 class UserInDB(UserBase):
-    id: UUID
+    id: Union[UUID, str]
     hashed_password: str
     created_at: datetime
     updated_at: datetime
 
     class Config:
         orm_mode = True
+        json_encoders = {
+            UUID: lambda u: str(u)
+        }
 
 class User(UserBase):
-    id: UUID
+    id: Union[UUID, str]
     created_at: datetime
     updated_at: datetime
 
     class Config:
         orm_mode = True
+        json_encoders = {
+            UUID: lambda u: str(u)
+        }
 
 class Token(BaseModel):
     access_token: str

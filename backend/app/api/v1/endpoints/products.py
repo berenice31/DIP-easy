@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.api import deps
+from app.schemas.product import ProductStatus
 
 router = APIRouter()
 
@@ -32,8 +33,8 @@ def create_product(
     """
     Create new product.
     """
-    product = crud.product.create(db=db, obj_in=product_in)
-    return product
+    product = crud.product.create(db=db, obj_in=product_in, user_id=current_user.id)
+    return schemas.Product.from_orm(product)
 
 @router.put("/{product_id}", response_model=schemas.Product)
 def update_product(
@@ -46,11 +47,11 @@ def update_product(
     """
     Update a product.
     """
-    product = crud.product.get(db=db, id=product_id)
+    product = crud.product.get(db=db, id=str(product_id))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     product = crud.product.update(db=db, db_obj=product, obj_in=product_in)
-    return product
+    return schemas.Product.from_orm(product)
 
 @router.get("/{product_id}", response_model=schemas.Product)
 def read_product(
@@ -62,7 +63,7 @@ def read_product(
     """
     Get product by ID.
     """
-    product = crud.product.get(db=db, id=product_id)
+    product = crud.product.get(db=db, id=str(product_id))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
@@ -77,8 +78,29 @@ def delete_product(
     """
     Delete a product.
     """
-    product = crud.product.get(db=db, id=product_id)
+    product = crud.product.get(db=db, id=str(product_id))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    product = crud.product.remove(db=db, id=product_id)
-    return product 
+    product = crud.product.remove(db=db, id=str(product_id))
+    return product
+
+@router.put("/{product_id}/submit", response_model=schemas.Product)
+def submit_product(
+    *,
+    db: Session = Depends(deps.get_db),
+    product_id: UUID,
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> schemas.Product:
+    """Validate and mark product as VALIDATED"""
+    product = crud.product.get(db=db, id=str(product_id))
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    if product.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    if product.status == ProductStatus.VALIDATED:
+        return product
+    try:
+        product = crud.product.submit(db=db, db_obj=product)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    return schemas.Product.from_orm(product) 
