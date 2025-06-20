@@ -1,6 +1,7 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from app import schemas, crud, models
 from app.api import deps
@@ -23,10 +24,25 @@ async def generate_document(
     product = crud.product.get(db, id=str(product_id))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    # Téléchargement du modèle (stub)
-    template_bytes = b"dummy"  # would be google_drive_service.download(template.drive_file_id)
-    rendered_bytes = docx_service.render(template_bytes, context={"product": {}})
-    drive_file_id = google_drive_service.upload(rendered_bytes, f"{product.nom_produit or 'document'}.docx")
+    # Téléchargement du modèle depuis Google Drive
+    template_bytes = google_drive_service.download(template.drive_file_id)
+
+    # Préparation du contexte : on sérialise le produit et le template
+    from app.schemas.product import Product as ProductSchema
+    product_data = ProductSchema.from_orm(product).dict()
+
+    rendered_bytes = docx_service.render(template_bytes, context={"product": product_data})
+    def _clean(s: str | None) -> str:
+        return (s or "").strip().replace(" ", "_")
+
+    filename_parts = [
+        _clean(product.nom_client),
+        _clean(product.marque),
+        _clean(product.nom_produit or "document"),
+    ]
+    filename = "-".join(filter(None, filename_parts)) + ".docx"
+
+    drive_file_id = google_drive_service.upload(rendered_bytes, filename)
 
     generation_in = schemas.GenerationCreate(product_id=product_id, template_id=template_id)
     generation = crud.generation.create_generation(db, obj_in=generation_in, drive_file_id=drive_file_id)
@@ -45,9 +61,43 @@ async def finalize_document(
         raise HTTPException(status_code=404, detail="Generation not found")
     # Upload final file
     drive_file_id = google_drive_service.upload(file.file, file.filename)
-    generation = crud.generation.update(db, db_obj=generation, obj_in={"drive_file_id": drive_file_id})
+    generation = crud.generation.update(
+        db,
+        db_obj=generation,
+        obj_in={"drive_file_id": drive_file_id, "status": "success", "completed_at": datetime.utcnow()},
+    )
     # Passer le produit au statut VALIDATED
     product = crud.product.get(db, id=str(generation.product_id))
     if product:
         crud.product.update(db, db_obj=product, obj_in={"status": "VALIDATED"})
-    return generation 
+    return generation
+
+@router.get("/", response_model=list[schemas.Generation])
+async def list_generations(
+    *,
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: models.User = Depends(deps.get_current_active_user),
+):
+    gens = crud.generation.get_multi(db, skip=skip, limit=limit)
+    return gens
+
+@router.delete("/{generation_id}", status_code=204)
+async def delete_generation(
+    *,
+    db: Session = Depends(deps.get_db),
+    generation_id: UUID,
+    current_user: models.User = Depends(deps.get_current_active_user),
+):
+    generation = crud.generation.get(db, id=str(generation_id))
+    if not generation:
+        raise HTTPException(status_code=404, detail="Generation not found")
+    # Optionally delete file from Drive
+    if generation.drive_file_id:
+        try:
+            google_drive_service.delete(generation.drive_file_id)
+        except Exception:
+            pass
+    crud.generation.remove(db, id=str(generation_id))
+    return 

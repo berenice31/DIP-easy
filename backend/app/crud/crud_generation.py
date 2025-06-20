@@ -17,8 +17,7 @@ class CRUDGeneration(CRUDBase[Generation, GenerationCreate, GenerationCreate]):
             template_id=obj_in.template_id,
             format="docx",
             drive_file_id=drive_file_id,
-            status="success",
-            completed_at=datetime.utcnow(),
+            status="pending",
         )
         db.add(db_obj)
         db.commit()

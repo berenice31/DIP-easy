@@ -64,9 +64,16 @@ class GoogleDriveService:
 
         from googleapiclient.http import MediaIoBaseUpload  # type: ignore
 
-        # Assure que l'objet est bien positionné au début
-        if isinstance(file_obj, io.BufferedIOBase):
-            file_obj.seek(0)
+        # Supportes aussi un 'bytes' brut : on le convertit en BytesIO pour obtenir l'API .seek()
+        if isinstance(file_obj, (bytes, bytearray)):
+            file_obj = io.BytesIO(file_obj)  # type: ignore[arg-type]
+
+        # Assure que l'objet est bien positionné au début s'il possède seek()
+        if hasattr(file_obj, "seek"):
+            try:
+                file_obj.seek(0)
+            except Exception:
+                pass
 
         # Récupère le dossier racine configuré (optionnel)
         from app.db.base import SessionLocal

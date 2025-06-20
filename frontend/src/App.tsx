@@ -11,7 +11,7 @@ import NewDip from "./pages/NewDip";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import ProductEdit from "./pages/ProductEdit";
-import GeneratePage from "./pages/Generate";
+import GenerationPage from "./pages/Generation";
 import Templates from "./pages/Templates";
 import AdminPage from "./pages/Admin";
 
@@ -84,10 +84,10 @@ function App() {
         />
         <Route path="/menus" element={<MenusPage />} />
         <Route
-          path="/generate"
+          path="/generation"
           element={
             <ProtectedRoute>
-              <GeneratePage />
+              <GenerationPage />
             </ProtectedRoute>
           }
         />

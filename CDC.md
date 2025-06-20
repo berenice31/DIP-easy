@@ -50,6 +50,16 @@ DIP-easy est une application web moderne conçue pour simplifier et accélérer 
 
 > Résultat : les fichiers .docx sont réellement stockés sur Drive, les modèles peuvent être supprimés sans erreur et l'interface présente désormais toutes les pages dans le layout unifié.
 
+### 22/06/2025 – Sprint « Génération UI & Flux final »
+
+| Domaine  | Avancement                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend  | • Endpoint `GET /generations` (listing) <br>• Endpoint `DELETE /generations/{id}` (clean + Drive) <br>• Ajout champ `status=pending / success`, `completed_at` <br>• Nom de fichier Drive: `Client-Marque-Produit.docx` <br>• Rendu DOCX via `docxtpl` (+ dépendances) <br>• Téléchargement réel du template depuis Drive et injection du contexte produit                                                                                               |
+| Frontend | • Page `/generation` refactor complète : wizard 3 étapes + tableau historique <br>• Sélection modèle + produit avec preview, barre de progression <br>• Téléversement version finale + validation produit <br>• Tableau récap : date, client, marque, produit, modèle, statut (Chip), actions (œil, nuage, poubelle) <br>• Icônes Material + couleur statut (vert « VALIDÉ », orange « BROUILLON ») <br>• Suppression d'une génération depuis le tableau |
+| Tests    | • Adjust Pytest (`test_generations`) pour nouveaux statuts <br>• Ajout tests rendu docx (à venir)                                                                                                                                                                                                                                                                                                                                                        |
+
+> Résultat : le flux de génération est complet, traçable et éditable. Les utilisateurs peuvent générer un DIP, le finaliser plus tard, visualiser ou supprimer les générations existantes. Le nom du fichier Drive est explicite pour faciliter la recherche.
+
 ## 2. Architecture Technique
 
 ### 2.1 Stack Technologique

@@ -803,6 +803,44 @@ paths:
       security:
       - OAuth2PasswordBearer: []
   /api/v1/generations/:
+    get:
+      tags:
+      - generations
+      summary: List Generations
+      operationId: list_generations_api_v1_generations__get
+      parameters:
+      - required: false
+        schema:
+          type: integer
+          title: Skip
+          default: 0
+        name: skip
+        in: query
+      - required: false
+        schema:
+          type: integer
+          title: Limit
+          default: 100
+        name: limit
+        in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Generation'
+                type: array
+                title: Response List Generations Api V1 Generations  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
     post:
       tags:
       - generations
