@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, DateTime, ForeignKey, text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
-from sqlalchemy.orm import relationship, synonym
+from sqlalchemy.orm import relationship, synonym, backref
 from sqlalchemy.sql import func
 from app.db.base import Base
 
@@ -21,8 +21,16 @@ class Generation(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
-    product = relationship("Product", backref="generations")
-    template = relationship("Template", backref="generations")
+    product = relationship(
+        "Product",
+        backref=backref("generations", passive_deletes=True),
+        passive_deletes=True,
+    )
+    template = relationship(
+        "Template",
+        backref=backref("generations", passive_deletes=True),
+        passive_deletes=True,
+    )
     tasks = relationship("Task", back_populates="generation")
 
     # Alias pythonic pour clarification (utilisé côté API/tests)

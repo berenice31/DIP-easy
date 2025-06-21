@@ -3,6 +3,7 @@ from typing import Optional, List
 from uuid import UUID
 from pydantic import BaseModel, Field, root_validator
 from enum import Enum
+from app.core.config import settings
 
 # Shared properties
 class ProductStatus(str, Enum):
@@ -43,6 +44,9 @@ class ProductBase(BaseModel):
 
     @root_validator
     def validate_required_if_validated(cls, values):
+        if not settings.STRICT_PRODUCT_VALIDATION:
+            return values
+
         if values.get("status") == ProductStatus.VALIDATED:
             required = [
                 "nom_commercial",

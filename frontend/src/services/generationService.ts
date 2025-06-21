@@ -29,6 +29,11 @@ class GenerationService {
     return response.data;
   }
 
+  async validate(id: string) {
+    const response = await api.patch(`${this.baseUrl}/${id}/validate`);
+    return response.data;
+  }
+
   async delete(id: string) {
     await api.delete(`${this.baseUrl}/${id}`);
   }

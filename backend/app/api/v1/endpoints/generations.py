@@ -7,6 +7,7 @@ from app import schemas, crud, models
 from app.api import deps
 from app.services.google_drive import google_drive_service
 from app.services.docx_service import docx_service
+from app.schemas.product import ProductStatus
 
 router = APIRouter()
 
@@ -26,12 +27,20 @@ async def generate_document(
         raise HTTPException(status_code=404, detail="Product not found")
     # Téléchargement du modèle depuis Google Drive
     template_bytes = google_drive_service.download(template.drive_file_id)
+    if not template_bytes:
+        raise HTTPException(
+            status_code=424,
+            detail="Template file unavailable on Google Drive (id may be deleted)",
+        )
 
     # Préparation du contexte : on sérialise le produit et le template
     from app.schemas.product import Product as ProductSchema
     product_data = ProductSchema.from_orm(product).dict()
 
     rendered_bytes = docx_service.render(template_bytes, context={"product": product_data})
+    if not rendered_bytes:
+        raise HTTPException(status_code=500, detail="Failed to render DOCX document")
+
     def _clean(s: str | None) -> str:
         return (s or "").strip().replace(" ", "_")
 
@@ -66,10 +75,6 @@ async def finalize_document(
         db_obj=generation,
         obj_in={"drive_file_id": drive_file_id, "status": "success", "completed_at": datetime.utcnow()},
     )
-    # Passer le produit au statut VALIDATED
-    product = crud.product.get(db, id=str(generation.product_id))
-    if product:
-        crud.product.update(db, db_obj=product, obj_in={"status": "VALIDATED"})
     return generation
 
 @router.get("/", response_model=list[schemas.Generation])
@@ -100,4 +105,62 @@ async def delete_generation(
         except Exception:
             pass
     crud.generation.remove(db, id=str(generation_id))
-    return 
+    return
+
+# ---------------------------------------------------------------------------
+# Validation -> PDF
+# ---------------------------------------------------------------------------
+
+@router.patch("/{generation_id}/validate", response_model=schemas.Generation)
+async def validate_generation(
+    *,
+    db: Session = Depends(deps.get_db),
+    generation_id: UUID,
+    current_user: models.User = Depends(deps.get_current_active_user),
+):
+    """Convertit la génération DOCX en PDF et marque le produit VALIDATED."""
+    generation = crud.generation.get(db, id=str(generation_id))
+    if not generation:
+        raise HTTPException(status_code=404, detail="Generation not found")
+
+    if generation.status == "success":
+        return generation  # déjà validé
+
+    # Télécharge / convertit via Google Drive
+    pdf_bytes = google_drive_service.convert_to_pdf(generation.drive_file_id)
+    if not pdf_bytes:
+        raise HTTPException(status_code=500, detail="Cannot convert document to PDF")
+
+    # Upload PDF
+    filename = "validated.pdf"
+    pdf_drive_id = google_drive_service.upload(pdf_bytes, filename, mime_type="application/pdf")
+
+    generation = crud.generation.update(
+        db,
+        db_obj=generation,
+        obj_in={
+            "drive_file_id": pdf_drive_id,
+            "format": "pdf",
+            "status": "success",
+            "completed_at": datetime.utcnow(),
+        },
+    )
+
+    # Mise à jour du produit associé uniquement si complet
+    product = crud.product.get(db, id=str(generation.product_id))
+    if product:
+        required = [
+            "nom_commercial",
+            "fournisseur",
+            "ref_formule",
+            "date_mise_marche",
+            "resp_mise_marche",
+            "faconnerie",
+        ]
+        if all(getattr(product, f) for f in required):
+            try:
+                crud.product.update(db, db_obj=product, obj_in={"status": ProductStatus.VALIDATED})
+            except Exception:
+                pass
+
+    return generation 

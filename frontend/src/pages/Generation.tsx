@@ -157,27 +157,18 @@ const GenerationPage: React.FC = () => {
     }
   };
 
-  const handleFinalizeFromTable = async (genId: string) => {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = ".docx";
-    fileInput.onchange = async () => {
-      if (fileInput.files?.length) {
-        const f = fileInput.files[0];
-        try {
-          await generationService.finalize(genId, f);
-          setSnackbar({ type: "success", message: "Document finalisé" });
-          const genResp = await generationService.list();
-          setGenerations(mergeGenerations(genResp));
-        } catch {
-          setSnackbar({
-            type: "error",
-            message: "Erreur lors de la finalisation",
-          });
-        }
-      }
-    };
-    fileInput.click();
+  const handleValidateGeneration = async (genId: string) => {
+    try {
+      await generationService.validate(genId);
+      setSnackbar({
+        type: "success",
+        message: "Document validé et PDF généré",
+      });
+      const genResp = await generationService.list();
+      setGenerations(mergeGenerations(genResp));
+    } catch {
+      setSnackbar({ type: "error", message: "Erreur lors de la validation" });
+    }
   };
 
   const handleDeleteGeneration = async (id: string) => {
@@ -419,7 +410,19 @@ const GenerationPage: React.FC = () => {
             </TableHead>
             <TableBody>
               {generations.map((g) => (
-                <TableRow key={g.id}>
+                <TableRow
+                  key={g.id}
+                  hover
+                  sx={{ cursor: g.drive_file_id ? "pointer" : "default" }}
+                  onClick={() => {
+                    if (g.drive_file_id) {
+                      window.open(
+                        `https://drive.google.com/file/d/${g.drive_file_id}/view`,
+                        "_blank"
+                      );
+                    }
+                  }}
+                >
                   <TableCell>
                     {new Date(g.initiated_at).toLocaleDateString()}
                   </TableCell>
@@ -443,11 +446,21 @@ const GenerationPage: React.FC = () => {
                         <VisibilityIcon />
                       </IconButton>
                     ) : (
-                      <IconButton onClick={() => handleFinalizeFromTable(g.id)}>
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleValidateGeneration(g.id);
+                        }}
+                      >
                         <CloudUploadIcon />
                       </IconButton>
                     )}
-                    <IconButton onClick={() => handleDeleteGeneration(g.id)}>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteGeneration(g.id);
+                      }}
+                    >
                       <DeleteIcon />
                     </IconButton>
                   </TableCell>

@@ -47,4 +47,35 @@ def test_generate_and_finalize(client: TestClient, test_user, monkeypatch):
     )
     assert final_resp.status_code == 200
     final_gen = final_resp.json()
-    assert final_gen["drive_file_id"] == "drive-final" 
+    assert final_gen["drive_file_id"] == "drive-final"
+
+def test_validate_generation(client: TestClient, test_user, monkeypatch):
+    headers = _auth_headers(test_user)
+
+    # patch Drive upload & download
+    from app.services import google_drive
+
+    # upload template (upload patched inside helper)
+    tpl = _upload_template(client, headers, monkeypatch)
+
+    # patch upload again for generation docx
+    monkeypatch.setattr(google_drive.google_drive_service, "upload", lambda *a, **k: "drive-docx")
+
+    # create product
+    product = client.post("/api/v1/products/", json={}, headers=headers).json()
+
+    # generate (draft)
+    gen = client.post(
+        "/api/v1/generations/", data={"template_id": tpl["id"], "product_id": product["id"]}, headers=headers
+    ).json()
+
+    # patch convert_to_pdf to return bytes and upload to return pdf id for PDF upload
+    monkeypatch.setattr(google_drive.google_drive_service, "convert_to_pdf", lambda fid: b"%PDF-1.4 dummy")
+    monkeypatch.setattr(google_drive.google_drive_service, "upload", lambda bytes_, name, **kw: "drive-pdf")
+
+    resp = client.patch(f"/api/v1/generations/{gen['id']}/validate", headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert data["format"] == "pdf"
+    assert data["drive_file_id"] == "drive-pdf" 

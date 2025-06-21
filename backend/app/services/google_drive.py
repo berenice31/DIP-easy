@@ -51,7 +51,7 @@ class GoogleDriveService:
     # API publique
     # ------------------------------------------------------------------
 
-    def upload(self, file_obj: IO[bytes], filename: str) -> str:
+    def upload(self, file_obj: IO[bytes], filename: str, mime_type: str = "application/vnd.openxmlformats-officedocument.wordprocessingml.document") -> str:
         """Upload un fichier et retourne son ID Google Drive.
 
         Si le service n'est pas configuré correctement, renvoie un ID factice
@@ -90,7 +90,7 @@ class GoogleDriveService:
         if folder_id:
             file_metadata["parents"] = [folder_id]
 
-        media = MediaIoBaseUpload(file_obj, mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document", resumable=False)
+        media = MediaIoBaseUpload(file_obj, mimetype=mime_type, resumable=False)
 
         try:
             result = (
@@ -149,6 +149,80 @@ class GoogleDriveService:
         except Exception as e:
             logging.warning("Erreur téléchargement fichier Drive %s: %s", file_id, e)
             return b""
+
+    # ------------------------------------------------------------------
+    # Conversion helpers
+    # ------------------------------------------------------------------
+
+    def convert_to_pdf(self, file_id: str) -> bytes:
+        """Convertit un fichier existant sur Drive en PDF et renvoie les octets.
+
+        • Si l'API Drive est inactive ou la conversion échoue, on retourne la
+          version téléchargée brute afin d'éviter une erreur HTTP 500.
+        """
+        import logging
+
+        service = self._get_service()
+        if service is None:            # Drive non configuré : tentative de conversion locale avec docx2pdf
+            try:
+                import tempfile, io, os
+                from docx2pdf import convert  # type: ignore
+
+                # Récupère le docx
+                docx_bytes = self.download(file_id)
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    docx_path = os.path.join(tmpdir, "input.docx")
+                    pdf_path = os.path.join(tmpdir, "output.pdf")
+                    with open(docx_path, "wb") as f:
+                        f.write(docx_bytes)
+
+                    # Lancement de la conversion (Word/LibreOffice requis)
+                    convert(docx_path, pdf_path)
+
+                    if os.path.exists(pdf_path):
+                        with open(pdf_path, "rb") as f:
+                            return f.read()
+            except Exception as e:
+                logging.warning("Conversion locale docx2pdf impossible: %s", e)
+
+            # En dernier recours, on renvoie le docx (l'appelant décidera)
+            return self.download(file_id)
+
+        try:
+            # Tentative d'export direct (fonctionne pour les fichiers Docs/Sheets).
+            pdf_bytes = (
+                service.files()
+                .export(fileId=file_id, mimeType="application/pdf")
+                .execute()
+            )
+            if pdf_bytes:
+                return pdf_bytes
+        except Exception as e:
+            logging.warning("Export PDF direct impossible: %s", e)
+
+        # Fallback : on tente de copier + convertir (Drive crée un Google Doc)
+        try:
+            copy = (
+                service.files()
+                .copy(body={"mimeType": "application/vnd.google-apps.document"}, fileId=file_id, fields="id")
+                .execute()
+            )
+            tmp_id = copy["id"]
+            pdf_bytes = (
+                service.files()
+                .export(fileId=tmp_id, mimeType="application/pdf")
+                .execute()
+            )
+            # Nettoyage copie
+            try:
+                service.files().delete(fileId=tmp_id).execute()
+            except Exception:
+                pass
+            return pdf_bytes
+        except Exception as e:
+            logging.warning("Conversion Drive -> PDF fallback échouée: %s", e)
+            # En dernier recours, renvoie le docx brut
+            return self.download(file_id)
 
     # ------------------------------------------------------------------
     # Helpers publics

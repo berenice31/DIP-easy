@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, ForeignKey, DateTime, text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from app.db.base import Base
 from sqlalchemy.sql import func
 
@@ -16,4 +16,8 @@ class CompatibilityTest(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
-    product = relationship("Product", backref="compatibility_tests") 
+    product = relationship(
+        "Product",
+        backref=backref("compatibility_tests", passive_deletes=True),
+        passive_deletes=True,
+    ) 

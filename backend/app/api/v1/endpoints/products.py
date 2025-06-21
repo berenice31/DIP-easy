@@ -81,8 +81,12 @@ def delete_product(
     product = crud.product.get(db=db, id=str(product_id))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    product = crud.product.remove(db=db, id=str(product_id))
-    return product
+
+    # Convert to schema BEFORE deleting to avoid SQLAlchemy "deleted instance" errors
+    product_data = schemas.Product.from_orm(product)
+
+    crud.product.remove(db=db, id=str(product_id))
+    return product_data
 
 @router.put("/{product_id}/submit", response_model=schemas.Product)
 def submit_product(

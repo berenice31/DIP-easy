@@ -902,6 +902,61 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
       - OAuth2PasswordBearer: []
+  /api/v1/generations/{generation_id}:
+    delete:
+      tags:
+      - generations
+      summary: Delete Generation
+      operationId: delete_generation_api_v1_generations__generation_id__delete
+      parameters:
+      - required: true
+        schema:
+          type: string
+          format: uuid
+          title: Generation Id
+        name: generation_id
+        in: path
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /api/v1/generations/{generation_id}/validate:
+    patch:
+      tags:
+      - generations
+      summary: Validate Generation
+      description: Convertit la génération DOCX en PDF et marque le produit VALIDATED.
+      operationId: validate_generation_api_v1_generations__generation_id__validate_patch
+      parameters:
+      - required: true
+        schema:
+          type: string
+          format: uuid
+          title: Generation Id
+        name: generation_id
+        in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Generation'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
   /api/v1/admin/drive/:
     get:
       tags:

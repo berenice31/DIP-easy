@@ -60,6 +60,15 @@ DIP-easy est une application web moderne conçue pour simplifier et accélérer 
 
 > Résultat : le flux de génération est complet, traçable et éditable. Les utilisateurs peuvent générer un DIP, le finaliser plus tard, visualiser ou supprimer les générations existantes. Le nom du fichier Drive est explicite pour faciliter la recherche.
 
+### 23/06/2025 – Sprint « Validation PDF & Workflow »
+
+| Domaine  | Avancement                                                                                                                                                                                                                                                                                                        |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend  | • Endpoint `PATCH /generations/{id}/validate` : export Drive → PDF<br>• Service `google_drive.convert_to_pdf` avec fallback local (`docx2pdf`) <br>• Upload PDF avec `mime_type=application/pdf` <br>• Statuts Génération : `pending` → `success` <br>• Flag `STRICT_PRODUCT_VALIDATION` pour faciliter les tests |
+| Frontend | • Ligne du tableau Générations cliquable (ouvre le doc sur Drive) <br>• Icône nuage ➜ appel `/validate`, rafraîchit la liste après succès <br>• Affichage toast succès/erreur                                                                                                                                     |
+
+> Résultat : le flux Brouillon → PDF validé est opérationnel ; les documents générés sont bien des PDF non modifiables.
+
 ## 2. Architecture Technique
 
 ### 2.1 Stack Technologique
@@ -302,3 +311,8 @@ interface User {
 - Ajout de filtres avancés
 - Optimisation des requêtes API
 - Amélioration de la gestion du cache
+
+### 👍 Améliorations demandées (à planifier)
+
+1. Rafraîchissement automatique : après l'appel `/generate`, la nouvelle génération doit apparaître dans le tableau sans recharger la page.
+2. Feedback utilisateur : lorsque l'icône nuage est cliquée, afficher un loader (spinner ou barre) pour indiquer que la validation/convert PDF est en cours.

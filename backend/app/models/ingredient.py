@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Float, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 from app.db.base import Base
 
@@ -17,4 +17,8 @@ class Ingredient(Base):
     ingr_provenance = Column(String, nullable=True)
     ingr_specif = Column(String, nullable=True)
 
-    product = relationship("Product", backref="ingredients") 
+    product = relationship(
+        "Product",
+        backref=backref("ingredients", passive_deletes=True),
+        passive_deletes=True,
+    ) 
