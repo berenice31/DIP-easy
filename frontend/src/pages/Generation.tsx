@@ -24,6 +24,7 @@ import {
   TableBody,
   IconButton,
   Chip,
+  CircularProgress,
 } from "@mui/material";
 import { Navigation } from "../components/layout/Navigation";
 import { templateService } from "../services/templateService";
@@ -49,14 +50,24 @@ interface ProductOption {
 
 const steps = ["Modèle", "Produit", "Génération"];
 
-const GenerationPage: React.FC = () => {
+interface GenerationPageProps {
+  initialStep?: number;
+  initialTemplateId?: string;
+  initialProductId?: string;
+}
+
+const GenerationPage: React.FC<GenerationPageProps> = ({
+  initialStep = 0,
+  initialTemplateId = "",
+  initialProductId = "",
+}) => {
   const [templates, setTemplates] = useState<TemplateOption[]>([]);
   const [products, setProducts] = useState<ProductOption[]>([]);
-  const [templateId, setTemplateId] = useState<string>("");
-  const [productId, setProductId] = useState<string>("");
+  const [templateId, setTemplateId] = useState<string>(initialTemplateId);
+  const [productId, setProductId] = useState<string>(initialProductId);
   const [generationId, setGenerationId] = useState<string | null>(null);
   const [driveId, setDriveId] = useState<string | null>(null);
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(initialStep);
   const [loadingGenerate, setLoadingGenerate] = useState(false);
   const [loadingFinalize, setLoadingFinalize] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -65,6 +76,7 @@ const GenerationPage: React.FC = () => {
     message: string;
   } | null>(null);
   const [generations, setGenerations] = useState<any[]>([]);
+  const [validatingId, setValidatingId] = useState<string | null>(null);
 
   const mergeGenerations = (list: any[]) =>
     list.map((g: any) => ({
@@ -124,6 +136,8 @@ const GenerationPage: React.FC = () => {
       const gen = await generationService.generate(templateId, productId);
       setGenerationId(gen.id);
       setDriveId(gen.drive_file_id);
+      const list = await generationService.list();
+      setGenerations(mergeGenerations(list));
       setSnackbar({
         type: "success",
         message: "Document généré : cliquez pour l'ouvrir.",
@@ -141,6 +155,8 @@ const GenerationPage: React.FC = () => {
     setLoadingFinalize(true);
     try {
       await generationService.finalize(generationId, file);
+      const list = await generationService.list();
+      setGenerations(mergeGenerations(list));
       setSnackbar({
         type: "success",
         message: "Document finalisé et produit validé.",
@@ -158,16 +174,19 @@ const GenerationPage: React.FC = () => {
   };
 
   const handleValidateGeneration = async (genId: string) => {
+    setValidatingId(genId);
     try {
       await generationService.validate(genId);
+      const genResp = await generationService.list();
+      setGenerations(mergeGenerations(genResp));
       setSnackbar({
         type: "success",
         message: "Document validé et PDF généré",
       });
-      const genResp = await generationService.list();
-      setGenerations(mergeGenerations(genResp));
     } catch {
       setSnackbar({ type: "error", message: "Erreur lors de la validation" });
+    } finally {
+      setValidatingId(null);
     }
   };
 
@@ -438,7 +457,9 @@ const GenerationPage: React.FC = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    {g.status === "success" && g.drive_file_id ? (
+                    {validatingId === g.id ? (
+                      <CircularProgress size={24} />
+                    ) : g.status === "success" && g.drive_file_id ? (
                       <IconButton
                         href={`https://drive.google.com/file/d/${g.drive_file_id}/view`}
                         target="_blank"
