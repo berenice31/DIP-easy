@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Goutte inversée avec contour blanc -->
-  <path d="M30 55C20 55 10 45 10 35C10 25 20 15 30 5C40 15 50 25 50 35C50 45 40 55 30 55Z" fill="transparent" stroke="white" stroke-width="3"/>
-  <!-- Coche -->
-  <path d="M25 35L20 30L18 32L25 39L42 22L40 20L25 35Z" fill="white"/>
-</svg> 

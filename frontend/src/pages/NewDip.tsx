@@ -23,6 +23,8 @@ import {
   DialogActions,
   Snackbar,
   Alert,
+  Switch,
+  FormControlLabel,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -33,6 +35,8 @@ import { useNavigate } from "react-router-dom";
 import { productService, DipFormData } from "../services/api";
 import api from "../services/api";
 import { Navigation } from "../components/layout/Navigation";
+import { AttachmentUploader } from "../components/common/AttachmentUploader";
+import { attachmentService } from "../services/attachmentService";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -191,6 +195,7 @@ const NewDip: React.FC<NewDipProps> = ({ initialData = {}, productId }) => {
     message: "",
     severity: "success",
   });
+  const [formulaAttachmentMode, setFormulaAttachmentMode] = useState(false);
   const {
     control,
     handleSubmit,
@@ -260,6 +265,22 @@ const NewDip: React.FC<NewDipProps> = ({ initialData = {}, productId }) => {
       reset((prev) => ({ ...prev, ...initialData }));
     }
   }, [initialData, reset]);
+
+  useEffect(() => {
+    const initFormulaToggle = async () => {
+      if (!productId) return;
+      try {
+        const attachments = await attachmentService.listByProduct(productId);
+        const hasFormulaPdf = attachments.some(
+          (att) => att.field_key === "formula"
+        );
+        if (hasFormulaPdf) setFormulaAttachmentMode(true);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    initFormulaToggle();
+  }, [productId]);
 
   const validationRules = {
     nom_client: { required: "Le nom du client est requis" },
@@ -1001,26 +1022,51 @@ const NewDip: React.FC<NewDipProps> = ({ initialData = {}, productId }) => {
                 <Typography variant="h6" gutterBottom>
                   Formule quali-quantitative
                 </Typography>
+                {productId && (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={formulaAttachmentMode}
+                        onChange={(e) =>
+                          setFormulaAttachmentMode(e.target.checked)
+                        }
+                        name="formulaAttachmentMode"
+                      />
+                    }
+                    label="Formule quali-quanti en pièce jointe"
+                    sx={{ mb: 2 }}
+                  />
+                )}
                 <Grid container spacing={3}>
-                  <Grid item xs={12}>
-                    <Controller
-                      name="ingredients"
-                      control={control}
-                      rules={validationRules.ingredients}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          required
-                          multiline
-                          rows={10}
-                          label="Liste des ingrédients"
-                          error={!!errors.ingredients}
-                          helperText={errors.ingredients?.message as string}
-                        />
-                      )}
-                    />
-                  </Grid>
+                  {!formulaAttachmentMode && (
+                    <Grid item xs={12}>
+                      <Controller
+                        name="ingredients"
+                        control={control}
+                        rules={validationRules.ingredients}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            fullWidth
+                            required
+                            multiline
+                            rows={10}
+                            label="Liste des ingrédients"
+                            error={!!errors.ingredients}
+                            helperText={errors.ingredients?.message as string}
+                          />
+                        )}
+                      />
+                    </Grid>
+                  )}
+                  {formulaAttachmentMode && productId && (
+                    <Grid item xs={12}>
+                      <AttachmentUploader
+                        productId={productId}
+                        fieldKey="formula"
+                      />
+                    </Grid>
+                  )}
                 </Grid>
               </TabPanel>
 

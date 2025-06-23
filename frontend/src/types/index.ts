@@ -117,3 +117,4 @@ export * from "./template";
 export * from "./task";
 export * from "./log";
 export * from "./setting";
+export * from "./attachment";

@@ -37,7 +37,22 @@ async def generate_document(
     from app.schemas.product import Product as ProductSchema
     product_data = ProductSchema.from_orm(product).dict()
 
-    rendered_bytes = docx_service.render(template_bytes, context={"product": product_data})
+    # Récupère les pièces jointes
+    attachment_objs = crud.attachment.get_multi_by_product(db, product_id=product_id)
+    attachments = [schemas.Attachment.from_orm(a).dict() for a in attachment_objs]
+    annexes = {
+        (a.alias or a.file_name): schemas.Attachment.from_orm(a).dict() for a in attachment_objs if (a.alias or a.file_name)
+    }
+
+    # Contexte pour docxtpl
+    rendered_bytes = docx_service.render(
+        template_bytes,
+        context={
+            "product": product_data,
+            "attachments": attachments,
+            "annexes": annexes,
+        },
+    )
     if not rendered_bytes:
         raise HTTPException(status_code=500, detail="Failed to render DOCX document")
 
@@ -143,6 +158,49 @@ async def validate_generation(
     pdf_bytes = google_drive_service.convert_to_pdf(generation.drive_file_id)
     if not pdf_bytes:
         raise HTTPException(status_code=500, detail="Cannot convert document to PDF")
+
+    # Fusionne les annexes PDF
+    try:
+        from io import BytesIO
+        from pypdf import PdfReader, PdfWriter  # type: ignore
+
+        attachment_objs = [
+            a for a in crud.attachment.get_multi_by_product(db, product_id=generation.product_id)
+            if a.mime_type == "application/pdf"
+        ]
+        if attachment_objs:
+            # Prépare dict alias -> annex PdfReader
+            annex_readers: dict[str, PdfReader] = {}
+            for a in attachment_objs:
+                alias = a.alias or a.file_name
+                annex_bytes = google_drive_service.download(a.drive_file_id)
+                if annex_bytes:
+                    annex_readers[alias] = PdfReader(BytesIO(annex_bytes))
+
+            # Parcours du document principal
+            main_reader = PdfReader(BytesIO(pdf_bytes))
+            writer = PdfWriter()
+
+            for page_idx, page in enumerate(main_reader.pages):
+                text = page.extract_text() or ""
+                writer.add_page(page)
+
+                # Recherche marqueurs dans cette page
+                for alias, annex_reader in annex_readers.items():
+                    marker = f"[[ANNEXE:{alias}]]"
+                    if marker in text:
+                        # Insère toutes les pages de l'annexe juste après la page courante
+                        for annex_page in annex_reader.pages:
+                            writer.add_page(annex_page)
+
+            out_buf = BytesIO()
+            writer.write(out_buf)
+            pdf_bytes = out_buf.getvalue()
+    except Exception:
+        # En cas d'erreur de fusion, on conserve le PDF original
+        import logging
+        logging.exception("Erreur fusion PDF annexes")
+        pass
 
     # Upload PDF dans le même dossier que la génération initiale
     product = crud.product.get(db, id=str(generation.product_id))

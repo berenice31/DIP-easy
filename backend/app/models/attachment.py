@@ -15,5 +15,6 @@ class Attachment(Base):
     mime_type = Column(String, nullable=True)
     url = Column(String, nullable=True)
     uploaded_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    alias = Column(String, nullable=True)
 
     product = relationship("Product", backref="attachments") 
