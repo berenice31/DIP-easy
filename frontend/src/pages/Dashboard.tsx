@@ -15,6 +15,10 @@ import {
   Description as DescriptionIcon,
   Pending as PendingIcon,
   CheckCircle as CheckCircleIcon,
+  Inventory as InventoryIcon,
+  ViewInAr as TemplateIcon,
+  CloudUpload as CloudIcon,
+  Percent as PercentIcon,
 } from "@mui/icons-material";
 
 interface User {
@@ -50,7 +54,62 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Statistiques */}
-        <CardGrid columns={3} gap="lg" className="mb-8">
+        <CardGrid columns={4} gap="lg" className="mb-8">
+          {/* Produits */}
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Produits
+                  </p>
+                  <p className="text-3xl font-bold text-blue-600 mt-2">
+                    {stats?.totalProducts ?? 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <InventoryIcon className="text-blue-600 text-3xl" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Produits brouillon
+                  </p>
+                  <p className="text-3xl font-bold text-yellow-600 mt-2">
+                    {stats?.draftProducts ?? 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-yellow-100 rounded-full">
+                  <PendingIcon className="text-yellow-600 text-3xl" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Produits validés
+                  </p>
+                  <p className="text-3xl font-bold text-green-600 mt-2">
+                    {stats?.validatedProducts ?? 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-full">
+                  <CheckCircleIcon className="text-green-600 text-3xl" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardContent>
               <div className="flex items-center justify-between">
@@ -102,29 +161,73 @@ const Dashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Modèles</p>
+                  <p className="text-3xl font-bold text-indigo-600 mt-2">
+                    {stats?.templatesCount ?? 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-indigo-100 rounded-full">
+                  <TemplateIcon className="text-indigo-600 text-3xl" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Générations en attente
+                  </p>
+                  <p className="text-3xl font-bold text-purple-600 mt-2">
+                    {stats?.pendingGenerations ?? 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-full">
+                  <CloudIcon className="text-purple-600 text-3xl" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Complétude moyenne
+                  </p>
+                  <p className="text-3xl font-bold text-teal-600 mt-2">
+                    {stats?.averageCompletion ?? 0}%
+                  </p>
+                </div>
+                <div className="p-3 bg-teal-100 rounded-full">
+                  <PercentIcon className="text-teal-600 text-3xl" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </CardGrid>
 
-        {/* Actions rapides */}
+        {/* Graphique placeholder */}
         <Card className="mb-8">
-          <CardHeader title="Actions rapides" />
+          <CardHeader title="Historique des DIP générés" />
           <CardContent>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <button className="flex flex-col items-center justify-center p-4 text-center transition-colors rounded-lg hover:bg-gray-50">
-                <span className="text-2xl">📝</span>
-                <span className="mt-2 text-sm font-medium">Nouveau DIP</span>
-              </button>
-              <button className="flex flex-col items-center justify-center p-4 text-center transition-colors rounded-lg hover:bg-gray-50">
-                <span className="text-2xl">📋</span>
-                <span className="mt-2 text-sm font-medium">Templates</span>
-              </button>
-              <button className="flex flex-col items-center justify-center p-4 text-center transition-colors rounded-lg hover:bg-gray-50">
-                <span className="text-2xl">📊</span>
-                <span className="mt-2 text-sm font-medium">Rapports</span>
-              </button>
-              <button className="flex flex-col items-center justify-center p-4 text-center transition-colors rounded-lg hover:bg-gray-50">
-                <span className="text-2xl">⚙️</span>
-                <span className="mt-2 text-sm font-medium">Paramètres</span>
-              </button>
+            <div className="text-center text-gray-400 py-10">
+              (Graphique d'évolution à venir)
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Actions prioritaires placeholder */}
+        <Card className="mb-8">
+          <CardHeader title="Actions prioritaires" />
+          <CardContent>
+            <div className="text-center text-gray-400 py-10">
+              (Aucune action prioritaire pour le moment)
             </div>
           </CardContent>
         </Card>

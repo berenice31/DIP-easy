@@ -317,6 +317,7 @@ interface User {
 1. Rafraîchissement automatique du tableau Générations après un appel `/generate`, `/finalize` ou `/validate`.
 2. Affichage d'un loader (`CircularProgress`) lors de l'appel `/validate` (conversion PDF).
 3. Les fichiers générés `.docx` et `.pdf` sont désormais nommés `<client>-<marque>-<produit>.<ext>` et enregistrés dans le dossier Google Drive de la référence formule, au même niveau que le dossier `Annexes`.
+4. Tableau de bord : distinction claire entre KPI « Produits » (total, brouillon, validés) et KPI « DIP » (générations : total, en attente, complétés) avec nouvelles cartes et mise à jour de l'API `/dashboard/stats`.
 
 ### 👍 Prochaines actions à planifier
 
