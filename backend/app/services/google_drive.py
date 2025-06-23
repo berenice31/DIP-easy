@@ -51,7 +51,14 @@ class GoogleDriveService:
     # API publique
     # ------------------------------------------------------------------
 
-    def upload(self, file_obj: IO[bytes], filename: str, mime_type: str = "application/vnd.openxmlformats-officedocument.wordprocessingml.document") -> str:
+    def upload(
+        self,
+        file_obj: IO[bytes] | bytes,
+        filename: str,
+        mime_type: str = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        *,
+        parent_id: str | None = None,
+    ) -> str:
         """Upload un fichier et retourne son ID Google Drive.
 
         Si le service n'est pas configuré correctement, renvoie un ID factice
@@ -75,20 +82,21 @@ class GoogleDriveService:
             except Exception:
                 pass
 
-        # Récupère le dossier racine configuré (optionnel)
-        from app.db.base import SessionLocal
-        from app.crud.crud_setting import setting as crud_setting
+        # Détermine le(s) dossier(s) parent(s)
+        if parent_id is None:
+            # Récupère le dossier racine configuré (optionnel)
+            from app.db.base import SessionLocal
+            from app.crud.crud_setting import setting as crud_setting
 
-        db = SessionLocal()
-        folder_id = None
-        try:
-            folder_id = crud_setting.get_value(db, self.SETTINGS_FOLDER)
-        finally:
-            db.close()
+            db = SessionLocal()
+            try:
+                parent_id = crud_setting.get_value(db, self.SETTINGS_FOLDER)
+            finally:
+                db.close()
 
         file_metadata = {"name": filename}
-        if folder_id:
-            file_metadata["parents"] = [folder_id]
+        if parent_id:
+            file_metadata["parents"] = [parent_id]
 
         media = MediaIoBaseUpload(file_obj, mimetype=mime_type, resumable=False)
 
@@ -149,6 +157,78 @@ class GoogleDriveService:
         except Exception as e:
             logging.warning("Erreur téléchargement fichier Drive %s: %s", file_id, e)
             return b""
+
+    # ------------------------------------------------------------------
+    # Folder helpers
+    # ------------------------------------------------------------------
+
+    def ensure_folder(self, path: list[str]) -> str:
+        """Vérifie l'existence (ou crée) une hiérarchie de dossiers et
+        renvoie l'ID du dernier dossier de la liste `path`.
+
+        Si le service Drive n'est pas configuré, renvoie un ID factice basé
+        sur le chemin pour permettre l'enchaînement des appels sans erreur.
+        """
+        import uuid, logging
+
+        if not path:
+            raise ValueError("Path must contain at least one segment")
+
+        service = self._get_service()
+        if service is None:
+            # Fallback mock – concat path pour rester unique entre appels
+            return f"mock-{ '/'.join(path) }-{uuid.uuid4()}"
+
+        # Récupère le dossier racine configuré (optionnel)
+        from app.db.base import SessionLocal
+        from app.crud.crud_setting import setting as crud_setting
+
+        db = SessionLocal()
+        try:
+            parent_id = crud_setting.get_value(db, self.SETTINGS_FOLDER)
+        finally:
+            db.close()
+
+        # Fonction interne pour trouver un sous-dossier par nom
+        def _find_child_folder(p_id: str | None, name: str) -> str | None:
+            # Échappe les apostrophes pour la requête Drive
+            escaped_name = name.replace("'", "\\'")
+            parent_filter = f" and '{p_id}' in parents" if p_id else " and 'root' in parents"
+            query_str = (
+                "mimeType='application/vnd.google-apps.folder' "
+                "and trashed=false "
+                f"and name='{escaped_name}'" + parent_filter
+            )
+
+            query = (
+                service.files()
+                .list(
+                    q=query_str,
+                    spaces="drive",
+                    fields="files(id, name)",
+                )
+                .execute()
+            )
+            files = query.get("files", [])
+            return files[0]["id"] if files else None
+
+        # Boucle sur chaque segment
+        for segment in path:
+            # Cherche l'existence dans le parent courant
+            existing_id = _find_child_folder(parent_id, segment)
+            if existing_id:
+                parent_id = existing_id
+                continue
+            # Sinon, crée le dossier
+            folder_metadata = {
+                "name": segment,
+                "mimeType": "application/vnd.google-apps.folder",
+            }
+            if parent_id:
+                folder_metadata["parents"] = [parent_id]
+            new_folder = service.files().create(body=folder_metadata, fields="id").execute()
+            parent_id = new_folder["id"]
+        return parent_id
 
     # ------------------------------------------------------------------
     # Conversion helpers

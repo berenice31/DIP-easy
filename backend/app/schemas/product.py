@@ -77,6 +77,7 @@ class ProductUpdate(ProductBase):
 # Properties shared by models stored in DB
 class ProductInDBBase(ProductBase):
     id: UUID
+    drive_folder_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     status: ProductStatus

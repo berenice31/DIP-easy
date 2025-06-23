@@ -312,7 +312,14 @@ interface User {
 - Optimisation des requêtes API
 - Amélioration de la gestion du cache
 
-### 👍 Améliorations demandées (à planifier)
+### ✅ Améliorations réalisées (24 / 06 / 2025)
 
-1. Rafraîchissement automatique : après l'appel `/generate`, la nouvelle génération doit apparaître dans le tableau sans recharger la page.
-2. Feedback utilisateur : lorsque l'icône nuage est cliquée, afficher un loader (spinner ou barre) pour indiquer que la validation/convert PDF est en cours.
+1. Rafraîchissement automatique du tableau Générations après un appel `/generate`, `/finalize` ou `/validate`.
+2. Affichage d'un loader (`CircularProgress`) lors de l'appel `/validate` (conversion PDF).
+3. Les fichiers générés `.docx` et `.pdf` sont désormais nommés `<client>-<marque>-<produit>.<ext>` et enregistrés dans le dossier Google Drive de la référence formule, au même niveau que le dossier `Annexes`.
+
+### 👍 Prochaines actions à planifier
+
+1. **Workflow GitHub** : ouvrir une Pull Request de `fresh-start` vers `main` afin de lancer la CI (lint, tests, build) et revue de code.
+2. **Arborescence Google Drive** : lors de la première sauvegarde d'un produit, créer automatiquement l'arborescence `Nom Client / Nom Produit / Référence Formule`, et stocker l'`id` du dossier final dans `Product.drive_folder_id`.
+3. **Archivage du .docx** : après validation PDF d'un DIP ou suppression d'une génération, déplacer le fichier `.docx` d'origine dans un dossier `Archive` (ou `Brouillons`) pour conserver une trace sans encombrer le dossier principal.

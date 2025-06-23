@@ -8,6 +8,7 @@ from app.crud.base import CRUDBase
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductUpdate, ProductStatus
 from app.models import Ingredient, StabilityTest, CompatibilityTest
+from app.services.google_drive import google_drive_service
 
 class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
     def create(self, db: Session, *, obj_in: ProductCreate, user_id: UUID) -> Product:
@@ -20,6 +21,29 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
         db_obj = self.model(**obj_in_data, user_id=user_id)
         db.add(db_obj)
         db.flush()  # Pour obtenir l'id du produit
+        # --------------------------------------------------------------
+        # Création des dossiers Google Drive correspondants (avant commit)
+        # --------------------------------------------------------------
+        try:
+            client_folder = (obj_in.nom_client or "SansClient").strip() or "SansClient"
+            product_folder = (obj_in.nom_produit or str(db_obj.id)).strip() or str(db_obj.id)
+            ref_formule_folder = (obj_in.ref_formule or "REF").strip() or "REF"
+
+            # 1. Client/Produit  → on stocke cet ID dans la colonne drive_folder_id
+            product_drive_id = google_drive_service.ensure_folder([client_folder, product_folder])
+
+            # 2. Produit/Ref_formule
+            formula_drive_id = google_drive_service.ensure_folder([client_folder, product_folder, ref_formule_folder])
+
+            # 3. Produit/Ref_formule/Annexes
+            _ = google_drive_service.ensure_folder([client_folder, product_folder, ref_formule_folder, "Annexes"])
+
+            # Sauvegarde sur l'objet avant commit final
+            db_obj.drive_folder_id = product_drive_id
+        except Exception:
+            # On ignore silencieusement les erreurs Drive afin de ne pas bloquer la création
+            pass
+
         # Ajout des enfants
         for ingr in ingredients_data:
             ingr_obj = Ingredient(**ingr, product_id=db_obj.id)
@@ -31,7 +55,7 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
             comp_obj = CompatibilityTest(**comp, product_id=db_obj.id)
             db.add(comp_obj)
         db.commit()
-        # Rafraîchir l'objet pour récupérer les nouvelles valeurs (ex. progression)
+        # Rafraîchir l'objet pour récupérer les nouvelles valeurs (ex. progression + drive_folder_id)
         db.refresh(db_obj)
         # Pas besoin de refresh sous SQLite, l'objet est déjà à jour
         return db_obj

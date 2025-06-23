@@ -1,13 +1,13 @@
-# Cahier des Charges (CDC) – Plateforme DIP’Easy
+# Cahier des Charges (CDC) – Plateforme DIP'Easy
 
 BUT DU PROJET:
 --> Ce site internet doit permettre de créer des DIP (dossier d'information produit) raapidement et facilement ! qu'est ce qu'un DIP? c'est un document reglementaire qui doit suivre un produit cosmétique pour que les autorités puissent vérifier que le produit est conforme et sans danger !
 
 Contexte & objectifs
 Contexte :
-Une PME de cosmétique souhaite automatiser et industrialiser la création de ses Dossiers d’Information Produit (DIP) afin de gagner en rapidité, traçabilité et conformité réglementaire.
+Une PME de cosmétique souhaite automatiser et industrialiser la création de ses Dossiers d'Information Produit (DIP) afin de gagner en rapidité, traçabilité et conformité réglementaire.
 Objectif principal :
-Développer une application web interne (DIP’Easy) qui guide le Responsable Qualité pas à pas :
+Développer une application web interne (DIP'Easy) qui guide le Responsable Qualité pas à pas :
 
 1. Collecte structurée des données et des documents bruts
 2. Configuration centralisée des modèles Word et chartes de style
@@ -18,34 +18,34 @@ Développer une application web interne (DIP’Easy) qui guide le Responsable Qu
 Pour chaque page, on définit :
 
 1. **User Story**
-2. **Critères d’acceptation**
+2. **Critères d'acceptation**
 3. **Tests à écrire** (unitaires, intégration, E2E)
 4. **Étapes TDD**
 
 **Note :**
 
-- Chaque test écrit **en premier** guide l’implémentation minimale.
-- **Ne jamais** modifier un test vert sans créer un nouveau test pour l’évolution.
-- La même démarche TDD s’applique à chaque micro-fonctionnalité ou fixe de bug.
-  > **Rappel** : à chaque étape, n’écrire que le test puis le code minimal, et ne jamais modifier un test déjà vert sans ajouter un nouveau test pour l’évolution.
+- Chaque test écrit **en premier** guide l'implémentation minimale.
+- **Ne jamais** modifier un test vert sans créer un nouveau test pour l'évolution.
+- La même démarche TDD s'applique à chaque micro-fonctionnalité ou fixe de bug.
+  > **Rappel** : à chaque étape, n'écrire que le test puis le code minimal, et ne jamais modifier un test déjà vert sans ajouter un nouveau test pour l'évolution.
 
 ## 0. Page Inscription / Connexion
 
 ### 0.1 User Story
 
-> En tant qu’utilisateur, je veux pouvoir créer un compte et/ou me connecter (login + mot de passe + 2FA si activé) afin d’accéder à l’application en toute sécurité.
+> En tant qu'utilisateur, je veux pouvoir créer un compte et/ou me connecter (login + mot de passe + 2FA si activé) afin d'accéder à l'application en toute sécurité.
 
-### 0.2 Critères d’acceptation
+### 0.2 Critères d'acceptation
 
-- **CA0.1** : La page d’inscription (`/signup`) permet de saisir email, mot de passe et confirme mot de passe.
+- **CA0.1** : La page d'inscription (`/signup`) permet de saisir email, mot de passe et confirme mot de passe.
 - **CA0.2** : Validation client des formats email et cohérence mot de passe / confirmation.
 - **CA0.3** : Soumission réussie crée un compte (statut draft) et redirige vers `/login`.
 - **CA0.4** : La page de connexion (`/login`) permet de saisir email + mot de passe.
-- **CA0.5** : Tentative de login avec identifiants invalides renvoie un message d’erreur (“401 Unauthorized”).
-- **CA0.6** : Si 2FA désactivé pour l’utilisateur, renvoyer directement un JWT et rediriger vers le Dashboard.
-- **CA0.7** : Si 2FA activé, login renvoie état “2FA required” et affiche formulaire de saisie du code.
+- **CA0.5** : Tentative de login avec identifiants invalides renvoie un message d'erreur ("401 Unauthorized").
+- **CA0.6** : Si 2FA désactivé pour l'utilisateur, renvoyer directement un JWT et rediriger vers le Dashboard.
+- **CA0.7** : Si 2FA activé, login renvoie état "2FA required" et affiche formulaire de saisie du code.
 - **CA0.8** : Validation du code 2FA correct renvoie le JWT et redirige vers le Dashboard.
-- **CA0.9** : Toute tentative d’accès aux routes protégées sans JWT renvoie 401.
+- **CA0.9** : Toute tentative d'accès aux routes protégées sans JWT renvoie 401.
 
 ### 0.3 Tests à écrire
 
@@ -91,12 +91,12 @@ Pour chaque page, on définit :
 
 ### 1.1 User Story
 
-> En tant que Responsable Qualité, je veux une vue d’ensemble des KPI et un accès rapide aux actions pour piloter mes DIP.
+> En tant que Responsable Qualité, je veux une vue d'ensemble des KPI et un accès rapide aux actions pour piloter mes DIP.
 
-### 1.2 Critères d’acceptation
+### 1.2 Critères d'acceptation
 
 - CA1.1 : Afficher nombre total de DIP générés sur la période sélectionnée.
-- CA1.2 : Afficher nombre d’erreurs en cours.
+- CA1.2 : Afficher nombre d'erreurs en cours.
 - CA1.3 : Afficher temps moyen de génération.
 - CA1.4 : Afficher une liste paginée des 10 derniers produits créés avec liens « Nouveau DIP » et « Voir logs ».
 - CA1.5 : Cliquer sur une carte KPI ouvre un filtre dédié.
@@ -124,7 +124,7 @@ Pour chaque page, on définit :
 2. **Implémenter** la route et la logique SQL pour calculer les KPI.
 3. **Refactor** service/dashboard pour extraire la logique réutilisable.
 4. **Écrire** un test front-end qui monte `<Dashboard/>` et simule les données (échec).
-5. **Implémenter** le composant et l’API call.
+5. **Implémenter** le composant et l'API call.
 6. **Ajouter** un test E2E Cypress pour le workflow complet.
 
 ---
@@ -135,12 +135,12 @@ Pour chaque page, on définit :
 
 > En tant que Responsable Qualité, je veux lister, filtrer et créer mes produits.
 
-### 2.2 Critères d’acceptation
+### 2.2 Critères d'acceptation
 
 - CA2.1 : Afficher un tableau paginé avec colonnes (Nom, Réf., Statut, % compl., Date).
 - CA2.2 : Filtres : champ texte (Nom/Ref), statut, date.
 - CA2.3 : Bouton « + Nouveau produit » ouvre un modal.
-- CA2.4 : Création d’un produit valide met à jour la table et apparaît immédiatement à l’écran.
+- CA2.4 : Création d'un produit valide met à jour la table et apparaît immédiatement à l'écran.
 
 ### 2.3 Tests à écrire
 
@@ -164,7 +164,7 @@ Pour chaque page, on définit :
 1. **Test** back-end `GET /api/products?filter...` (rouge).
 2. **Implémenter** la requête SQL et la route.
 3. **Test** front-end du composant `<ProductsTable/>` avec données mock.
-4. **Implémenter** l’appel API + affichage.
+4. **Implémenter** l'appel API + affichage.
 5. **Test** E2E de bout en bout création de produit.
 6. **Refactor** extraction du service product.
 
@@ -176,12 +176,12 @@ Pour chaque page, on définit :
 
 > En tant que Responsable Qualité, je veux un formulaire multi-étapes pour saisir toutes les données du DIP.
 
-### 3.2 Critères d’acceptation
+### 3.2 Critères d'acceptation
 
 - CA3.1 : Présenter 5 onglets (Infos, Formule, Physico, Microbio, Annexes).
 - CA3.2 : Chaque onglet affiche les champs et mini-uploader correspondants.
 - CA3.3 : Jauge de complétude mise à jour à chaque sauvegarde.
-- CA3.4 : On ne peut passer à l’onglet suivant qu’avec validation des champs requis.
+- CA3.4 : On ne peut passer à l'onglet suivant qu'avec validation des champs requis.
 - CA3.5 : Sauvegarde automatique (debounce 500 ms) en base.
 
 ### 3.3 Tests à écrire
@@ -206,7 +206,7 @@ Pour chaque page, on définit :
 1. **Test** back `PUT /api/products/{id}/step/informations` (fail).
 2. **Implémenter** la sauvegarde JSONB + retour de status.
 3. **Test** front `<WizardTabs/>` initial rendering.
-4. **Implémenter** styles et logique d’état des onglets.
+4. **Implémenter** styles et logique d'état des onglets.
 5. **Test** front `<StepForm/>` validation client (échec).
 6. **Implémenter** validation et appel auto-save.
 7. **Test** E2E pour le workflow complet de collecte.
@@ -219,7 +219,7 @@ Pour chaque page, on définit :
 
 > En tant que Responsable Qualité, je veux importer, configurer et versionner mes modèles DIP.
 
-### 4.2 Critères d’acceptation
+### 4.2 Critères d'acceptation
 
 - CA4.1 : Liste des templates avec noms, versions, miniatures.
 - CA4.2 : Bouton « Importer » ouvre un uploader qui stocke sur Drive et enregistre métadonnées.
@@ -259,12 +259,15 @@ Pour chaque page, on définit :
 
 > En tant que Responsable Qualité, je veux générer et télécharger mon DIP en Word ou PDF.
 
-### 5.2 Critères d’acceptation
+### 5.2 Critères d'acceptation
 
 - CA5.1 : Sélecteurs produit, template, format apparaissent.
-- CA5.2 : “Générer” lance un job asynchrone, bouton désactivé pendant exécution.
-- CA5.3 : À la fin, un aperçu PDF s’affiche et un lien de téléchargement est disponible.
+- CA5.2 : "Générer" lance un job asynchrone, bouton désactivé pendant exécution.
+- CA5.3 : À la fin, un aperçu PDF s'affiche et un lien de téléchargement est disponible.
 - CA5.4 : Historique listé en bas avec statut, date, lien.
+- CA5.5 : Les fichiers .docx et .pdf sont automatiquement enregistrés sur Google Drive dans le dossier
+  `<Client>/<Produit>/<Réf_formule>/`, au même niveau que le sous-dossier « Annexes », avec le nom
+  `<client>-<marque>-<produit>.<ext>`.
 
 ### 5.3 Tests à écrire
 
@@ -299,7 +302,7 @@ Pour chaque page, on définit :
 
 > En tant que Responsable Qualité, je veux planifier des rappels et tâches récurrentes.
 
-### 6.2 Critères d’acceptation
+### 6.2 Critères d'acceptation
 
 - CA6.1 : Afficher liste de tâches (titre, fréquence, statut).
 - CA6.2 : Bouton « Nouvelle tâche » ouvre un modal de création.
@@ -336,12 +339,12 @@ Pour chaque page, on définit :
 
 ### 7.1 User Story
 
-> En tant que Responsable Qualité, je veux consulter l’historique de toutes les actions.
+> En tant que Responsable Qualité, je veux consulter l'historique de toutes les actions.
 
-### 7.2 Critères d’acceptation
+### 7.2 Critères d'acceptation
 
 - CA7.1 : Timeline verticale chronologique.
-- CA7.2 : Filtres par date et type d’événement.
+- CA7.2 : Filtres par date et type d'événement.
 - CA7.3 : Bouton « Export » génère un CSV.
 
 ### 7.3 Tests à écrire
@@ -375,9 +378,9 @@ Pour chaque page, on définit :
 
 ### 8.1 User Story
 
-> En tant qu’Admin, je veux gérer les utilisateurs et paramètres globaux.
+> En tant qu'Admin, je veux gérer les utilisateurs et paramètres globaux.
 
-### 8.2 Critères d’acceptation
+### 8.2 Critères d'acceptation
 
 - CA8.1 : CRUD complet sur les utilisateurs et leurs rôles.
 - CA8.2 : Onglets de paramètres (auth, sauvegardes, quotas).
@@ -414,13 +417,13 @@ Pour chaque page, on définit :
 
 ### 9.1 User Story
 
-> En tant qu’utilisateur, je veux accéder à la FAQ et solliciter un chatbot.
+> En tant qu'utilisateur, je veux accéder à la FAQ et solliciter un chatbot.
 
-### 9.2 Critères d’acceptation
+### 9.2 Critères d'acceptation
 
 - CA9.1 : FAQ en accordéons filtrable par mot-clé.
 - CA9.2 : Chatbot widget ouvert en bas à droite.
-- CA9.3 : Formulaire “Signaler un bug” en bas de page.
+- CA9.3 : Formulaire "Signaler un bug" en bas de page.
 
 ### 9.3 Tests à écrire
 

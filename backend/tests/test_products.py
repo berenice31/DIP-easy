@@ -23,6 +23,7 @@ def test_create_and_read_product(client: TestClient, test_user):
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["nom_commercial"] == PRODUCT_PAYLOAD["nom_commercial"]
+    assert data.get("drive_folder_id")  # devrait exister même en mock
     product_id = data["id"]
 
     # Lecture

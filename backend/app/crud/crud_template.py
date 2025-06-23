@@ -10,9 +10,20 @@ class CRUDTemplate(CRUDBase[Template, TemplateCreate, TemplateCreate]):
     def create_with_file(
         self, db: Session, *, obj_in: TemplateCreate, drive_file_id: str
     ) -> Template:
-        # Récupérer la version la plus haute pour ce nom
-        count_existing = db.query(Template).filter(Template.name == obj_in.name).count()
-        next_version = str(count_existing + 1)
+        # Récupère la dernière version existante pour ce nom
+        last_tpl = (
+            db.query(Template)
+            .filter(Template.name == obj_in.name)
+            .order_by(cast(Template.version, Integer).desc())
+            .first()
+        )
+
+        # Si un template existe déjà avec le même fichier Drive, ne crée pas de doublon
+        if last_tpl and last_tpl.drive_file_id == drive_file_id:
+            return last_tpl
+
+        next_version = str((int(last_tpl.version) if last_tpl else 0) + 1)
+
         db_obj = Template(
             name=obj_in.name,
             version=next_version,

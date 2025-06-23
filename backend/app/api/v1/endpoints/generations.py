@@ -51,7 +51,13 @@ async def generate_document(
     ]
     filename = "-".join(filter(None, filename_parts)) + ".docx"
 
-    drive_file_id = google_drive_service.upload(rendered_bytes, filename)
+    # Détermine le dossier Drive cible : <Client>/<Produit>/<Ref_formule>
+    client_folder = (product.nom_client or "SansClient").strip() or "SansClient"
+    product_folder = (product.nom_produit or str(product.id)).strip() or str(product.id)
+    ref_folder = (product.ref_formule or "REF").strip() or "REF"
+    formula_drive_id = google_drive_service.ensure_folder([client_folder, product_folder, ref_folder])
+
+    drive_file_id = google_drive_service.upload(rendered_bytes, filename, parent_id=formula_drive_id)
 
     generation_in = schemas.GenerationCreate(product_id=product_id, template_id=template_id)
     generation = crud.generation.create_generation(db, obj_in=generation_in, drive_file_id=drive_file_id)
@@ -69,7 +75,14 @@ async def finalize_document(
     if not generation:
         raise HTTPException(status_code=404, detail="Generation not found")
     # Upload final file
-    drive_file_id = google_drive_service.upload(file.file, file.filename)
+    # Upload dans le dossier ref_formule
+    product = crud.product.get(db, id=str(generation.product_id))
+    client_folder = (product.nom_client or "SansClient").strip() or "SansClient"
+    product_folder = (product.nom_produit or str(product.id)).strip() or str(product.id)
+    ref_folder = (product.ref_formule or "REF").strip() or "REF"
+    formula_drive_id = google_drive_service.ensure_folder([client_folder, product_folder, ref_folder])
+
+    drive_file_id = google_drive_service.upload(file.file, file.filename, parent_id=formula_drive_id)
     generation = crud.generation.update(
         db,
         db_obj=generation,
@@ -131,9 +144,30 @@ async def validate_generation(
     if not pdf_bytes:
         raise HTTPException(status_code=500, detail="Cannot convert document to PDF")
 
-    # Upload PDF
-    filename = "validated.pdf"
-    pdf_drive_id = google_drive_service.upload(pdf_bytes, filename, mime_type="application/pdf")
+    # Upload PDF dans le même dossier que la génération initiale
+    product = crud.product.get(db, id=str(generation.product_id))
+    client_folder = (product.nom_client or "SansClient").strip() or "SansClient"
+    product_folder = (product.nom_produit or str(product.id)).strip() or str(product.id)
+    ref_folder = (product.ref_formule or "REF").strip() or "REF"
+    formula_drive_id = google_drive_service.ensure_folder([client_folder, product_folder, ref_folder])
+
+    # Construit le même nom que le DOCX initial
+    def _clean(s: str | None) -> str:
+        return (s or "").strip().replace(" ", "_")
+
+    filename_parts = [
+        _clean(product.nom_client),
+        _clean(product.marque),
+        _clean(product.nom_produit or "document"),
+    ]
+    filename = "-".join(filter(None, filename_parts)) + ".pdf"
+
+    pdf_drive_id = google_drive_service.upload(
+        pdf_bytes,
+        filename,
+        mime_type="application/pdf",
+        parent_id=formula_drive_id,
+    )
 
     generation = crud.generation.update(
         db,
@@ -147,7 +181,6 @@ async def validate_generation(
     )
 
     # Mise à jour du produit associé uniquement si complet
-    product = crud.product.get(db, id=str(generation.product_id))
     if product:
         required = [
             "nom_commercial",
