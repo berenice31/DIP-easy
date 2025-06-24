@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.api import api_router
-from app.db import ensure_alias_column
+from app.db import ensure_alias_column, ensure_pg_extensions
 import app.models  # noqa
 from app.db.base import Base, engine
 
@@ -41,5 +41,6 @@ def root():
     return {"message": "Welcome to DIP-easy API"}
 
 ensure_alias_column()
+ensure_pg_extensions()
 
 Base.metadata.create_all(bind=engine) 
