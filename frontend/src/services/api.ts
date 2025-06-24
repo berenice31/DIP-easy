@@ -1,7 +1,8 @@
 import axios from "axios";
 import { storage } from "../utils/storage";
 
-const API_URL = "http://localhost:8000/api/v1";
+const API_URL =
+  (import.meta.env.VITE_API_URL as string) || "http://localhost:8000/api/v1";
 
 const TOKEN_KEY = "token";
 const REFRESH_TOKEN_KEY = "refresh_token";
