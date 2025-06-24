@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.api import api_router
 from app.db import ensure_alias_column
+import app.models  # noqa
+from app.db.base import Base, engine
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -38,4 +40,6 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 def root():
     return {"message": "Welcome to DIP-easy API"}
 
-ensure_alias_column() 
+ensure_alias_column()
+
+Base.metadata.create_all(bind=engine) 
