@@ -33,6 +33,7 @@ import { generationService } from "../services/generationService";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Link as RouterLink } from "react-router-dom";
 
 interface TemplateOption {
   id: string;
@@ -428,68 +429,80 @@ const GenerationPage: React.FC<GenerationPageProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {generations.map((g) => (
-                <TableRow
-                  key={g.id}
-                  hover
-                  sx={{ cursor: g.drive_file_id ? "pointer" : "default" }}
-                  onClick={() => {
-                    if (g.drive_file_id) {
-                      window.open(
-                        `https://drive.google.com/file/d/${g.drive_file_id}/view`,
-                        "_blank"
-                      );
-                    }
-                  }}
-                >
-                  <TableCell>
-                    {new Date(g.initiated_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{g.product?.nom_client}</TableCell>
-                  <TableCell>{g.product?.marque}</TableCell>
-                  <TableCell>{g.product?.nom_produit}</TableCell>
-                  <TableCell>{g.template?.name || g.template_id}</TableCell>
-                  <TableCell>
-                    {g.status === "success" ? (
-                      <Chip label="VALIDÉ" color="success" size="small" />
-                    ) : (
-                      <Chip label="BROUILLON" color="warning" size="small" />
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {validatingId === g.id ? (
-                      <CircularProgress size={24} />
-                    ) : g.status === "success" && g.drive_file_id ? (
-                      <IconButton
-                        href={`https://drive.google.com/file/d/${g.drive_file_id}/view`}
-                        target="_blank"
-                      >
-                        <VisibilityIcon />
-                      </IconButton>
-                    ) : (
+              {[...generations]
+                .sort(
+                  (a, b) =>
+                    new Date(b.initiated_at).getTime() -
+                    new Date(a.initiated_at).getTime()
+                )
+                .slice(0, 3)
+                .map((g) => (
+                  <TableRow
+                    key={g.id}
+                    hover
+                    sx={{ cursor: g.drive_file_id ? "pointer" : "default" }}
+                    onClick={() => {
+                      if (g.drive_file_id) {
+                        window.open(
+                          `https://drive.google.com/file/d/${g.drive_file_id}/view`,
+                          "_blank"
+                        );
+                      }
+                    }}
+                  >
+                    <TableCell>
+                      {new Date(g.initiated_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{g.product?.nom_client}</TableCell>
+                    <TableCell>{g.product?.marque}</TableCell>
+                    <TableCell>{g.product?.nom_produit}</TableCell>
+                    <TableCell>{g.template?.name || g.template_id}</TableCell>
+                    <TableCell>
+                      {g.status === "success" ? (
+                        <Chip label="VALIDÉ" color="success" size="small" />
+                      ) : (
+                        <Chip label="BROUILLON" color="warning" size="small" />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {validatingId === g.id ? (
+                        <CircularProgress size={24} />
+                      ) : g.status === "success" && g.drive_file_id ? (
+                        <IconButton
+                          href={`https://drive.google.com/file/d/${g.drive_file_id}/view`}
+                          target="_blank"
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleValidateGeneration(g.id);
+                          }}
+                        >
+                          <CloudUploadIcon />
+                        </IconButton>
+                      )}
                       <IconButton
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleValidateGeneration(g.id);
+                          handleDeleteGeneration(g.id);
                         }}
                       >
-                        <CloudUploadIcon />
+                        <DeleteIcon />
                       </IconButton>
-                    )}
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteGeneration(g.id);
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </Paper>
+        <Box sx={{ mt: 2 }}>
+          <Button variant="outlined" component={RouterLink} to="/dips">
+            Voir tous les DIP
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

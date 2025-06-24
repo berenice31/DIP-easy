@@ -14,6 +14,7 @@ import ProductEdit from "./pages/ProductEdit";
 import GenerationPage from "./pages/Generation";
 import Templates from "./pages/Templates";
 import AdminPage from "./pages/Admin";
+import DIPsPage from "./pages/DIPs";
 
 const theme = createTheme({
   palette: {
@@ -88,6 +89,14 @@ function App() {
           element={
             <ProtectedRoute>
               <GenerationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dips"
+          element={
+            <ProtectedRoute>
+              <DIPsPage />
             </ProtectedRoute>
           }
         />

@@ -72,6 +72,12 @@ export const Navigation: React.FC = () => {
       requiresAuth: true,
     },
     {
+      text: "Tous les DIP",
+      icon: <LogsIcon />,
+      path: "/dips",
+      requiresAuth: true,
+    },
+    {
       text: "Automatisation",
       icon: <AutomationIcon />,
       path: "/automation",

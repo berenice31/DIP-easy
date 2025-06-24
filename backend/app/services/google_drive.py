@@ -247,14 +247,17 @@ class GoogleDriveService:
             try:
                 import tempfile, io, os
                 from docx2pdf import convert  # type: ignore
+                from app.utils.docx_links import strip_hyperlinks
 
                 # Récupère le docx
                 docx_bytes = self.download(file_id)
                 with tempfile.TemporaryDirectory() as tmpdir:
                     docx_path = os.path.join(tmpdir, "input.docx")
                     pdf_path = os.path.join(tmpdir, "output.pdf")
+
+                    clean_bytes = strip_hyperlinks(docx_bytes)
                     with open(docx_path, "wb") as f:
-                        f.write(docx_bytes)
+                        f.write(clean_bytes)
 
                     # Lancement de la conversion (Word/LibreOffice requis)
                     convert(docx_path, pdf_path)

@@ -324,3 +324,11 @@ interface User {
 1. **Workflow GitHub** : ouvrir une Pull Request de `fresh-start` vers `main` afin de lancer la CI (lint, tests, build) et revue de code.
 2. **Arborescence Google Drive** : lors de la première sauvegarde d'un produit, créer automatiquement l'arborescence `Nom Client / Nom Produit / Référence Formule`, et stocker l'`id` du dossier final dans `Product.drive_folder_id`.
 3. **Archivage du .docx** : après validation PDF d'un DIP ou suppression d'une génération, déplacer le fichier `.docx` d'origine dans un dossier `Archive` (ou `Brouillons`) pour conserver une trace sans encombrer le dossier principal.
+
+### TODO (backend génération PDF)
+
+- [ ] Supprimer totalement les hyperliens (et leur texte) lors de la conversion DOCX ➜ PDF.
+  - Actuellement, `strip_hyperlinks` retire la balise `<w:hyperlink>` mais le lien reste visible dans le PDF.
+  - Vérifier la chaîne : `make_links_clickable` (DOCX) ➜ `strip_hyperlinks` ➜ `docx2pdf`.
+  - Explorer alternative : convertir via `python-docx` en supprimant également les runs contenant l'URL AVANT `docx2pdf`, ou utiliser l'option `--no-hyperlinks` de LibreOffice.
+  - Voir issue #?? sur GitHub.

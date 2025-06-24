@@ -95,7 +95,7 @@ const Products: React.FC = () => {
           <Tooltip title="Modifier">
             <IconButton
               size="small"
-              onClick={() => handleEdit(params?.row?.id)}
+              onClick={(e) => handleEdit(params?.row?.id, e)}
             >
               <EditIcon />
             </IconButton>
@@ -103,7 +103,7 @@ const Products: React.FC = () => {
           <Tooltip title="Supprimer">
             <IconButton
               size="small"
-              onClick={() => handleDeleteClick(params?.row)}
+              onClick={(e) => handleDeleteClick(params?.row, e)}
             >
               <DeleteIcon />
             </IconButton>
@@ -113,11 +113,13 @@ const Products: React.FC = () => {
     },
   ];
 
-  const handleEdit = (id: string) => {
+  const handleEdit = (id: string, event?: React.MouseEvent) => {
+    event?.stopPropagation();
     navigate(`/products/${id}/edit`);
   };
 
-  const handleDeleteClick = (product: Product) => {
+  const handleDeleteClick = (product: Product, event: React.MouseEvent) => {
+    event.stopPropagation();
     setSelectedProduct(product);
     setDeleteDialogOpen(true);
   };
@@ -199,6 +201,7 @@ const Products: React.FC = () => {
               pageSizeOptions={[10, 25, 50]}
               checkboxSelection
               disableRowSelectionOnClick
+              onRowClick={(params) => handleEdit(params.row.id)}
               slots={{
                 toolbar: GridToolbar,
               }}
@@ -206,6 +209,11 @@ const Products: React.FC = () => {
                 toolbar: {
                   showQuickFilter: true,
                   quickFilterProps: { debounceMs: 500 },
+                },
+              }}
+              sx={{
+                "& .MuiDataGrid-row": {
+                  cursor: "pointer",
                 },
               }}
             />

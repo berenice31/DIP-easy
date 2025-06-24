@@ -37,6 +37,7 @@ import api from "../services/api";
 import { Navigation } from "../components/layout/Navigation";
 import { AttachmentUploader } from "../components/common/AttachmentUploader";
 import { attachmentService } from "../services/attachmentService";
+import Breadcrumbs from "../components/common/Breadcrumbs";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -180,6 +181,20 @@ interface NewDipProps {
 }
 
 const NewDip: React.FC<NewDipProps> = ({ initialData = {}, productId }) => {
+  const breadcrumbItems = React.useMemo(() => {
+    const items: { label: string; to?: string }[] = [
+      { label: "Produits", to: "/products" },
+    ];
+    if (initialData && initialData.nom_commercial) {
+      items.push({ label: initialData.nom_commercial as string });
+    } else {
+      items.push({ label: "Nouveau DIP" });
+    }
+    if (initialData && initialData.ref_formule) {
+      items.push({ label: initialData.ref_formule as string });
+    }
+    return items;
+  }, [initialData]);
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<{ [k: number]: boolean }>({});
@@ -754,6 +769,8 @@ const NewDip: React.FC<NewDipProps> = ({ initialData = {}, productId }) => {
           <Typography variant="h4" component="h1" gutterBottom>
             Nouveau DIP
           </Typography>
+
+          <Breadcrumbs items={breadcrumbItems} />
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stepper activeStep={activeStep} sx={{ mb: 2 }}>
