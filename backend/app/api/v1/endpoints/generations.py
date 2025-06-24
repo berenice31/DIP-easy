@@ -2,6 +2,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from datetime import datetime
+from sqlalchemy import cast, String
 
 from app import schemas, crud, models
 from app.api import deps
@@ -113,7 +114,14 @@ async def list_generations(
     limit: int = 100,
     current_user: models.User = Depends(deps.get_current_active_user),
 ):
-    gens = crud.generation.get_multi(db, skip=skip, limit=limit)
+    gens = (
+        db.query(models.Generation)
+        .join(models.Product, models.Generation.product_id == models.Product.id)
+        .filter(cast(models.Product.user_id, String) == str(current_user.id))
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     return gens
 
 @router.delete("/{generation_id}", status_code=204)

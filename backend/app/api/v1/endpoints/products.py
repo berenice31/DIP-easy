@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import cast, String
 
 from app import crud, models, schemas
 from app.api import deps
@@ -20,7 +21,13 @@ def read_products(
     """
     Retrieve products.
     """
-    products = crud.product.get_multi(db, skip=skip, limit=limit)
+    products = (
+        db.query(models.Product)
+        .filter(cast(models.Product.user_id, String) == str(current_user.id))
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     return products
 
 @router.post("/", response_model=schemas.Product)
@@ -50,6 +57,8 @@ def update_product(
     product = crud.product.get(db=db, id=str(product_id))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    if product.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
     product = crud.product.update(db=db, db_obj=product, obj_in=product_in)
     return schemas.Product.from_orm(product)
 
@@ -66,6 +75,8 @@ def read_product(
     product = crud.product.get(db=db, id=str(product_id))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    if product.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
     return product
 
 @router.delete("/{product_id}", response_model=schemas.Product)
@@ -81,6 +92,8 @@ def delete_product(
     product = crud.product.get(db=db, id=str(product_id))
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    if product.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
     # Convert to schema BEFORE deleting to avoid SQLAlchemy "deleted instance" errors
     product_data = schemas.Product.from_orm(product)
