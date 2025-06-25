@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, ForeignKey, DateTime, text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from app.db.base import Base
 from sqlalchemy.sql import func
 
@@ -17,4 +17,11 @@ class Attachment(Base):
     uploaded_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     alias = Column(String, nullable=True)
 
-    product = relationship("Product", backref="attachments") 
+    product = relationship(
+        "Product",
+        backref=backref(
+            "attachments",
+            cascade="all, delete-orphan",
+            passive_deletes=True,
+        ),
+    ) 

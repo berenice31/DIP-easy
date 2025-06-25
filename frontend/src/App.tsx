@@ -109,7 +109,7 @@ function App() {
           }
         />
         <Route
-          path="/admin"
+          path="/drive"
           element={
             <ProtectedRoute>
               <AdminPage />

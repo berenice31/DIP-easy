@@ -1,4 +1,5 @@
-from typing import IO
+from typing import IO, Optional
+from functools import lru_cache
 
 class GoogleDriveService:
     """Service stub pour interagir avec Google Drive.
@@ -8,15 +9,15 @@ class GoogleDriveService:
     pour éviter les appels réseau.
     """
 
-    _service = None  # Cache du client Google Drive
+    _service_cache: dict[Optional[str], Optional["Any"]] = {}  # user_id -> service (ou None)
 
     SETTINGS_CREDENTIALS = "drive_credentials"
     SETTINGS_FOLDER = "drive_root_folder_id"
 
-    def _get_service(self):
+    def _get_service(self, user_id: str | None = None):
         """Retourne (et met en cache) le client Google Drive v3."""
-        if self._service is not None:
-            return self._service
+        if user_id in self._service_cache:
+            return self._service_cache[user_id]
 
         # Lazy import pour éviter le coût lorsque non utilisé (& faciliter les tests unitaires)
         from googleapiclient.discovery import build  # type: ignore
@@ -28,7 +29,10 @@ class GoogleDriveService:
 
         db = SessionLocal()
         try:
-            creds_json = crud_setting.get_value(db, self.SETTINGS_CREDENTIALS)
+            key_credentials = (
+                f"{self.SETTINGS_CREDENTIALS}_{user_id}" if user_id else self.SETTINGS_CREDENTIALS
+            )
+            creds_json = crud_setting.get_value(db, key_credentials)
             if creds_json is None:
                 raise RuntimeError("Google Drive credentials not configured (drive_credentials)")
 
@@ -37,12 +41,12 @@ class GoogleDriveService:
             creds = service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
 
             # 'cache_discovery=False' to avoid writing to disk when running inside some environments
-            self._service = build("drive", "v3", credentials=creds, cache_discovery=False)
-            return self._service
+            self._service_cache[user_id] = build("drive", "v3", credentials=creds, cache_discovery=False)
+            return self._service_cache[user_id]
         except Exception as e:
             logging.exception("Unable to build Google Drive service: %s", e)
             # Fallback to mocked behaviour to éviter plantage complet
-            self._service = None
+            self._service_cache[user_id] = None
             return None
         finally:
             db.close()

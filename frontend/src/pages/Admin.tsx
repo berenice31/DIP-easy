@@ -8,6 +8,8 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { adminDriveService } from "../services/adminDriveService";
+import { driveService } from "../services/driveService";
+import { useAuth } from "../hooks/useAuth";
 import { Layout } from "../components/layout/Layout";
 
 const AdminPage: React.FC = () => {
@@ -15,14 +17,22 @@ const AdminPage: React.FC = () => {
   const [config, setConfig] = useState<any>(null);
   const [folderInput, setFolderInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const { user } = useAuth();
+  const [unauthorized, setUnauthorized] = useState(false);
 
   const refresh = async () => {
     setLoading(true);
+    const isAdmin = user?.role === "admin";
+    const svc = isAdmin ? adminDriveService : driveService;
     try {
-      const cfg = await adminDriveService.getConfig();
+      const cfg = await svc.getConfig();
       setConfig(cfg);
       setFolderInput(cfg.root_folder_id || "");
-    } catch (e) {
+      setUnauthorized(false);
+    } catch (e: any) {
+      if (e.response?.status === 403) {
+        setUnauthorized(true);
+      }
       console.error(e);
     } finally {
       setLoading(false);
@@ -36,8 +46,10 @@ const AdminPage: React.FC = () => {
   const handleUploadCreds = async () => {
     if (!file) return;
     setLoading(true);
+    const isAdmin = user?.role === "admin";
+    const svc = isAdmin ? adminDriveService : driveService;
     try {
-      await adminDriveService.uploadCredentials(file);
+      await svc.uploadCredentials(file);
       await refresh();
       alert("Credentials enregistrés");
       setFile(null);
@@ -52,8 +64,10 @@ const AdminPage: React.FC = () => {
   const handleSaveFolder = async () => {
     if (!folderInput) return;
     setLoading(true);
+    const isAdmin = user?.role === "admin";
+    const svc = isAdmin ? adminDriveService : driveService;
     try {
-      await adminDriveService.setFolder(folderInput);
+      await svc.setFolder(folderInput);
       await refresh();
       alert("Folder ID enregistré");
     } catch (e) {
@@ -64,12 +78,29 @@ const AdminPage: React.FC = () => {
     }
   };
 
+  if (unauthorized) {
+    return (
+      <Layout>
+        <Box sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, maxWidth: 600, mx: "auto" }}>
+            <Typography variant="h4" gutterBottom>
+              Accès réservé aux administrateurs
+            </Typography>
+            <Typography>
+              Vous n'avez pas les droits pour consulter cette page.
+            </Typography>
+          </Paper>
+        </Box>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <Box sx={{ p: 3 }}>
         <Paper sx={{ p: 3, maxWidth: 600, mx: "auto" }}>
           <Typography variant="h4" gutterBottom>
-            Administration – Google Drive
+            Mon Drive – Google Drive
           </Typography>
           {loading && <LinearProgress />}
           {config && (

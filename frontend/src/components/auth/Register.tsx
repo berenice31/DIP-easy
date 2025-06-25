@@ -40,7 +40,14 @@ const Register: React.FC = () => {
       await authService.register(formData);
       navigate("/login");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Une erreur est survenue");
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        setError(detail.map((d: any) => d.msg).join("\n"));
+      } else if (typeof detail === "string") {
+        setError(detail);
+      } else {
+        setError("Une erreur est survenue");
+      }
     }
   };
 

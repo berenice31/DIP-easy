@@ -66,4 +66,12 @@ class Product(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
-    status = Column(SAEnum("DRAFT", "VALIDATED", name="product_status", native_enum=False), nullable=False, server_default="DRAFT") 
+    status = Column(SAEnum("DRAFT", "VALIDATED", name="product_status", native_enum=False), nullable=False, server_default="DRAFT")
+
+    # Relations
+    # attachments = relationship(
+    #     "Attachment",
+    #     backref="product",
+    #     cascade="all, delete-orphan",
+    #     passive_deletes=True,
+    # ) 

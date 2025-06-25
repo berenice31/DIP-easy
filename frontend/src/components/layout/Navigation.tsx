@@ -90,9 +90,9 @@ export const Navigation: React.FC = () => {
       requiresAuth: true,
     },
     {
-      text: "Administration",
+      text: "Mon Drive",
       icon: <AdminIcon />,
-      path: "/admin",
+      path: "/drive",
       requiresAuth: true,
     },
   ];
